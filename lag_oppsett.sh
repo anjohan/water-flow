@@ -16,7 +16,7 @@ echo $nederst > nederst.dat
 echo $x > x.dat
 echo $y > y.dat
 
-echo "log log.passivering
+echo "log log.oppsett
     #/atom 1 silicon
     #/atom 2 oxygen
     #/atom 3 hydrogen
@@ -25,67 +25,80 @@ echo "log log.passivering
 
     units metal
     boundary p p p
-    atom_style	molecular
+    atom_style molecular
 
     read_data ../betacristobalite.data
-    replicate $antx $anty 25
+    replicate $antx $anty $systemhoyde
 
-    pair_style  usc
-    pair_coeff  * * ../SiOH2O.vashishta Si O H
-    pair_modify coord 2 1 2.0 0.3
-    pair_modify coord 2 3 1.4 0.3
+    # pair_style  usc
+    # pair_coeff  * * ../SiOH2O.vashishta Si O H
+    # pair_modify coord 2 1 2.0 0.3
+    # pair_modify coord 2 3 1.4 0.3
+    pair_style zero 5.0 nocoeff
+    pair_coeff * *
     mass            1 28.08
     mass            2 15.9994
     mass            3 1.00794
 
     region helesystemet block EDGE EDGE EDGE EDGE EDGE EDGE
-    region ytreblokk block EDGE EDGE EDGE EDGE ${midtenavbunn} ${midtenavtopp} side out
-    region bunnhard block EDGE EDGE EDGE EDGE ${nederst} ${midtenavbunn}
-    region boks2 block EDGE EDGE EDGE EDGE ${midtenavbunn} ${toppavbunn}
-    region kule sphere ${xmid} ${ymid} ${zkule} ${R}
-    region boks1 block EDGE EDGE EDGE EDGE ${bunnavtopp} ${toppavtopp}
-    region slett_boks block EDGE EDGE EDGE EDGE ${toppavtopp} EDGE
 
-    region R_topp union 2 kule boks1
-    region ALT union 4 kule boks1 boks2 bunnhard side out
-    region bunn union 2 bunnhard boks2
-    region sylinder cylinder z ${xmid} ${xmid} ${sylinderradius} EDGE EDGE
+    region tomromnederst block EDGE EDGE EDGE EDGE EDGE ${nederst}
+    region tomromz block EDGE EDGE EDGE EDGE ${nederst} EDGE side out
+    region mykbunn1 block EDGE EDGE EDGE EDGE ${nederst} ${midtenavbunn1}
+    region hardbunn block EDGE EDGE EDGE EDGE ${midtenavbunn1} ${midtenavbunn2}
+    region mykbunn2 block EDGE EDGE EDGE EDGE ${midtenavbunn2} ${toppavbunn}
+    region bunn union 3 hardbunn mykbunn1 mykbunn2
+    region sylinder cylinder z ${xmid} ${xmid} ${sylinderradius} ${nederst} EDGE
 
 
-    group G_topp region R_topp
-    group hard_topp region boks1
-    group frosten region bunnhard
-    group G_bunn region bunn
-    group kanbevegeseg subtract all frosten
-    group kanbevegesegutentoppen subtract kanbevegeseg hard_topp
+    group bunn region bunn
+    group hardbunn region hardbunn
+    group sylinder region sylinder
+    group beholdes union bunn sylinder
+    group slettes subtract all beholdes
 
-    velocity kanbevegesegutentoppen create $T 277385 mom yes loop geom
-    delete_atoms region slett_boks
-    delete_atoms region ALT
+    delete_atoms group slettes
 
-    compute mass_center G_topp com
-    compute normalkraft hard_topp reduce sum fz
+    group kanbevegeseg subtract all hardbunn
+
 
     thermo 10
-    thermo_style custom step time temp press pzz etotal c_mass_center[1] c_mass_center[3] c_normalkraft cpuremain
+    thermo_style custom step time temp press pzz etotal cpuremain
 
-    group sio2 region helesystemet
+    group silisium type 1
+    group oksygen type 2
 
-    fix passivate all passivate
-    run 1
-    unfix passivate
+    variable antsilisium equal count(silisium)
+    variable antoksygen equal count(oksygen)
+    variable antsilisiumx2 equal '2*count(silisium)'
 
-    group newAtoms subtract all sio2
-    group ytreblokk region ytreblokk
-    group OHytreblokk intersect newAtoms ytreblokk
-    delete_atoms group OHytreblokk compress yes
-    group kanbevegesegutentoppen union kanbevegesegutentoppen newAtoms
-    fix konstant2 kanbevegesegutentoppen nvt temp $T $T 1.0
+    region skalfylles union 3 tomromz bunn sylinder side out
+    group forstokiometrisering region helesystemet
 
-    region nedrehalvdel block EDGE EDGE EDGE EDGE EDGE ${midten}
-    group nedrehalvdel region nedrehalvdel
-    write_dump nedrehalvdel xyz nedrehalvdel.xyz
-    delete_atoms group nedrehalvdel
 
-    write_restart ovrehalvdel.restart
-    " > data/passivering.in
+    if '\${antoksygen} > \${antsilisiumx2}' then &
+        \"variable antsilisiumsommangler equal '(v_antoksygen - v_antsilisiumx2)/2'\" &
+        \"create_atoms 1 random \${antsilisiumsommangler} 142857 skalfylles\" &
+    elif '\${antoksygen} < \${antsilisiumx2}' &
+        \"variable antoksygensommangler equal 'v_antsilisiumx2} - v_antoksygen'\" &
+        \"create_atoms 2 random \${antoksygensommangler} 142857 skalfylles\"
+
+    group nyeatomer subtract all forstokiometrisering
+    group kanbevegeseg union nyeatomer
+
+    velocity kanbevegeseg create $T 277385 mom yes loop geom
+
+    timestep ${dt}
+    run 200000
+
+    fix termostat kanbevegeseg nvt temp $T $T 1.0
+
+
+
+    # group sio2 region helesystemet
+    # group OHgrupper subtract all sio2
+
+    # group kanbevegeseg union kanbevegeseg OHgrupper
+
+    write_restart klartilpassivering.restart
+    " > data/oppsett.in
