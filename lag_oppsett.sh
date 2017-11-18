@@ -8,7 +8,7 @@ then
     mkdir data
 fi
 
-cp job.sh data/job.sh
+cp job_oppsett.pdb data/job_oppsett.pdb
 
 source system.sh
 
@@ -19,6 +19,13 @@ echo $y > y.dat
 echo $toppavsylinder > toppavsylinder.dat
 echo $sylinderradius > sylinderradius.dat
 echo $sylinderhoyde > sylinderhoyde.dat
+
+dt=0.002
+tid=100
+ant=$(py "${tid}/${td}")
+
+antdumps=100
+dumpfrekv=$(py "${ant}/${antdumps}")
 
 echo "log log.oppsett
     #/atom 1 silicon
@@ -37,11 +44,11 @@ echo "log log.oppsett
     # pair_coeff  * * ../SiOH2O.vashishta Si O H
     # pair_modify coord 2 1 2.0 0.3
     # pair_modify coord 2 3 1.4 0.3
-    pair_style zero 5.0 nocoeff
-    pair_coeff * *
+    pair_style vashishta
+    pair_coeff	* * ../SiO2.vashishta Si O
     mass            1 28.08
     mass            2 15.9994
-    mass            3 1.00794
+    #mass            3 1.00794
 
     region helesystemet block EDGE EDGE EDGE EDGE EDGE EDGE
 
@@ -67,6 +74,7 @@ echo "log log.oppsett
 
     thermo 10
     thermo_style custom step time temp press pzz etotal cpuremain
+    dump lagring all custom ${dumpfrekv} oppsett.in.bin id type x y z
 
     group silisium type 1
     group oksygen type 2
@@ -91,12 +99,13 @@ echo "log log.oppsett
 
     velocity kanbevegeseg create $T 277385 mom yes loop geom
 
+    group silisium type 1
+    group oksygen type 2
+
     timestep ${dt}
-    run 200000
+    run ${ant}
 
     fix termostat kanbevegeseg nvt temp $T $T 1.0
-
-
 
     # group sio2 region helesystemet
     # group OHgrupper subtract all sio2

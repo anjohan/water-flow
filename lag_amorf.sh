@@ -34,8 +34,8 @@ echo "log log.amorf
     #/bond 1 2 2.6
     #/bond 2 3 1.4
 
-    package gpu 2
-    suffix gpu
+    #package gpu 2
+    #suffix gpu
 
     units metal
     boundary p p p
