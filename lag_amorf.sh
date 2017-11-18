@@ -8,7 +8,7 @@ then
     mkdir data
 fi
 
-cp job.sh data/job.sh
+cp job_amorf.pbs data/job_amorf.pbs
 
 source system.sh
 startT=$T
@@ -34,8 +34,8 @@ echo "log log.amorf
     #/bond 1 2 2.6
     #/bond 2 3 1.4
 
-    package omp 4
-    suffix omp
+    package gpu 2
+    suffix gpu
 
     units metal
     boundary p p p
@@ -52,7 +52,7 @@ echo "log log.amorf
     neigh_modify every 1 delay 0 check yes
     timestep ${dt}
 
-    thermo 10
+    thermo 100
     thermo_style custom step time temp press pzz etotal spcpu cpuremain
     dump lagring all custom ${dumpfrekv} amorf.in.bin id type x y z
 
@@ -70,5 +70,6 @@ echo "log log.amorf
     fix termostat all nvt temp $T $T 1.0
     run ${anttermaliseringslutt}
 
-    write_restart amorf.data
+    write_data ../amorf.data
+    write_restart amorf.restart
     " > data/amorf.in

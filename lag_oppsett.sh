@@ -12,9 +12,13 @@ cp job.sh data/job.sh
 
 source system.sh
 
+echo $toppavbunn > toppavbunn.dat
 echo $nederst > nederst.dat
 echo $x > x.dat
 echo $y > y.dat
+echo $toppavsylinder > toppavsylinder.dat
+echo $sylinderradius > sylinderradius.dat
+echo $sylinderhoyde > sylinderhoyde.dat
 
 echo "log log.oppsett
     #/atom 1 silicon
@@ -27,8 +31,7 @@ echo "log log.oppsett
     boundary p p p
     atom_style molecular
 
-    read_data ../betacristobalite.data
-    replicate $antx $anty $systemhoyde
+    read_data ../amorf.data
 
     # pair_style  usc
     # pair_coeff  * * ../SiOH2O.vashishta Si O H
@@ -80,7 +83,7 @@ echo "log log.oppsett
         \"variable antsilisiumsommangler equal '(v_antoksygen - v_antsilisiumx2)/2'\" &
         \"create_atoms 1 random \${antsilisiumsommangler} 142857 skalfylles\" &
     elif '\${antoksygen} < \${antsilisiumx2}' &
-        \"variable antoksygensommangler equal 'v_antsilisiumx2} - v_antoksygen'\" &
+        \"variable antoksygensommangler equal 'v_antsilisiumx2 - v_antoksygen'\" &
         \"create_atoms 2 random \${antoksygensommangler} 142857 skalfylles\"
 
     group nyeatomer subtract all forstokiometrisering

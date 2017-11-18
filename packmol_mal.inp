@@ -1,0 +1,15 @@
+tolerance 2.0
+
+output nedrehalvdel.pdb
+
+filetype xyz
+
+structure data/nedrehalvdel.xyz
+    number 1
+    inside box 0 0 ZBUNN X Y ZMAKS
+end structure
+
+structure vann.xyz
+    number HJELP
+    inside box 0 0 VANNBUNN X Y VANNTOPP
+end structure
