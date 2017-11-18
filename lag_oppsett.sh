@@ -75,7 +75,7 @@ echo "log log.oppsett
 
     thermo 10
     thermo_style custom step time temp press pzz etotal cpuremain
-    dump lagring all custom 10 oppsett.in.bin id type x y z
+    dump lagring all custom ${dumpfrekv} oppsett.in.bin id type x y z
 
     group silisium type 1
     group oksygen type 2
