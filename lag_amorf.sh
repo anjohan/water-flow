@@ -53,7 +53,7 @@ echo "log log.amorf
     timestep ${dt}
 
     thermo 10
-    thermo_style custom step time temp press pzz etotal cpuremain
+    thermo_style custom step time temp press pzz etotal spcpu cpuremain
     dump lagring all custom ${dumpfrekv} amorf.in.bin id type x y z
 
     velocity all create ${startT} 277385 mom yes loop geom
