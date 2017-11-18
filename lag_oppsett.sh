@@ -75,7 +75,7 @@ echo "log log.oppsett
 
     thermo 10
     thermo_style custom step time temp press pzz etotal cpuremain
-    dump lagring all custom ${dumpfrekv} oppsett.in.bin id type x y z
+    dump lagring all custom 10 oppsett.in.bin id type x y z
 
     group silisium type 1
     group oksygen type 2
@@ -97,6 +97,8 @@ echo "log log.oppsett
 
     group nyeatomer subtract all forstokiometrisering
     group kanbevegeseg union nyeatomer
+
+    minimize 1e-6 1e-6 1000 1000
 
     fix termostat kanbevegeseg nvt temp $T $T 1.0
     velocity kanbevegeseg create $T 277385 mom yes loop geom
