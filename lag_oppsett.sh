@@ -8,7 +8,7 @@ then
     mkdir data
 fi
 
-cp job_oppsett.pdb data/job_oppsett.pdb
+cp job_oppsett.pbs data/job_oppsett.pbs
 
 source system.sh
 
@@ -22,7 +22,7 @@ echo $sylinderhoyde > sylinderhoyde.dat
 
 dt=0.002
 tid=100
-ant=$(py "${tid}/${td}")
+ant=$(py "${tid}/${dt}")
 
 antdumps=100
 dumpfrekv=$(py "${ant}/${antdumps}")
@@ -97,6 +97,7 @@ echo "log log.oppsett
     group nyeatomer subtract all forstokiometrisering
     group kanbevegeseg union nyeatomer
 
+    fix termostat kanbevegeseg nvt temp $T $T 1.0
     velocity kanbevegeseg create $T 277385 mom yes loop geom
 
     group silisium type 1
@@ -105,7 +106,6 @@ echo "log log.oppsett
     timestep ${dt}
     run ${ant}
 
-    fix termostat kanbevegeseg nvt temp $T $T 1.0
 
     # group sio2 region helesystemet
     # group OHgrupper subtract all sio2
