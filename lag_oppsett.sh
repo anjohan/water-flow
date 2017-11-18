@@ -8,6 +8,7 @@ then
     mkdir data
 fi
 
+cp job.sh data/
 cp job_oppsett.pbs data/job_oppsett.pbs
 
 source system.sh

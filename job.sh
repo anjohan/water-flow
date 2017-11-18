@@ -1,7 +1,7 @@
 #!/bin/sh
 # #SBATCH --job-name=cyl_long
-#SBATCH --account=trocks
-# #SBATCH --account=nn9272k
+# #SBATCH --account=trocks
+#SBATCH --account=nn9272k
 # GI SOM ARGUMENT
 ##SBATCH --time='00:10:00'
 #SBATCH --mem-per-cpu=3600M
