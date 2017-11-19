@@ -12,7 +12,7 @@ structure data/passivert.xyz
 end structure
 
 structure vann.xyz
-    number HJELP
-    inside box 0 0 VANNBUNN X Y VANNTOPP
-    outside cylinder MIDTx MIDTy VANNBUNN 0 0 1 RADIUS hoyde
+    number 112062
+    inside box 0 0 42.96 214.8 214.8 128.88
+    outside cylinder 107.4 107.4 42.96 0 0 1 28.64 85.92
 end structure

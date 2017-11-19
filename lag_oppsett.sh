@@ -13,13 +13,13 @@ cp job_oppsett.pbs data/job_oppsett.pbs
 
 source system.sh
 
-echo $toppavbunn > toppavbunn.dat
-echo $nederst > nederst.dat
-echo $x > x.dat
-echo $y > y.dat
-echo $toppavsylinder > toppavsylinder.dat
-echo $sylinderradius > sylinderradius.dat
-echo $sylinderhoyde > sylinderhoyde.dat
+echo $toppavbunn > .toppavbunn.dat
+echo $nederst > .nederst.dat
+echo $x > .x.dat
+echo $y > .y.dat
+echo $toppavsylinder > .toppavsylinder.dat
+echo $sylinderradius > .sylinderradius.dat
+echo $sylinderhoyde > .sylinderhoyde.dat
 
 dt=0.002
 tid=100
