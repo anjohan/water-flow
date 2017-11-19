@@ -5,6 +5,7 @@ output data/medvann.pdb
 filetype xyz
 
 nloop 10000
+movebadrandom
 
 structure data/passivert.xyz
     number 1
@@ -13,6 +14,6 @@ end structure
 
 structure vann.xyz
     number 112062
-    inside box 0 0 42.96 214.8 214.8 128.88
     outside cylinder 107.4 107.4 42.96 0 0 1 28.64 85.92
+    inside box 0 0 42.96 214.8 214.8 128.88
 end structure

@@ -1,6 +1,5 @@
 from math import pi
 
-
 with open(".nederst.dat", "r") as fil:
     nederst = float(fil.read())
 with open(".toppavbunn.dat", "r") as fil:
