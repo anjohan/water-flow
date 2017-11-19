@@ -87,6 +87,10 @@ echo "log log.oppsett
     region skalfylles union 3 tomromz bunn sylinder side out
     group forstokiometrisering region helesystemet
 
+    if '\$(v_antoksygen % 2)' then &
+        \"create_atoms 2 random 1 142857 skalfylles\"
+
+    group oksygen type 2
 
     if '\${antoksygen} > \${antsilisiumx2}' then &
         \"variable antsilisiumsommangler equal '(v_antoksygen - v_antsilisiumx2)/2'\" &
