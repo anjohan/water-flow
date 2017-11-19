@@ -32,7 +32,7 @@ txt = txt.replace("VANNBUNN", str(toppavbunn))
 txt = txt.replace("VANNTOPP", str(toppavsylinder))
 txt = txt.replace("HJELP", str(antall))
 txt = txt.replace("RADIUS", str(R))
-txt = txt.replace("hoyde", str(h))
+txt = txt.replace("hoyde", str(10*h))
 
 with open("vann.inp", "w") as fil:
     fil.write(txt)

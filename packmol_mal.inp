@@ -5,7 +5,6 @@ output data/medvann.pdb
 filetype xyz
 
 nloop 10000
-movebadrandom
 
 structure data/passivert.xyz
     number 1
