@@ -94,10 +94,10 @@ echo "log log.oppsett
 
     if '\${antoksygen} > \${antsilisiumx2}' then &
         \"variable antsilisiumsommangler equal '(v_antoksygen - v_antsilisiumx2)/2'\" &
-        \"create_atoms 1 random \${antsilisiumsommangler} 142857 skalfylles\" &
+        \"create_atoms 1 random \${antsilisiumsommangler} 142858 skalfylles\" &
     elif '\${antoksygen} < \${antsilisiumx2}' &
         \"variable antoksygensommangler equal 'v_antsilisiumx2 - v_antoksygen'\" &
-        \"create_atoms 2 random \${antoksygensommangler} 142857 skalfylles\"
+        \"create_atoms 2 random \${antoksygensommangler} 142858 skalfylles\"
 
     group nyeatomer subtract all forstokiometrisering
     group kanbevegeseg union nyeatomer

@@ -9,6 +9,7 @@ then
 fi
 
 cp job.sh data/job.sh
+cp ./job_passivering.pbs data/job_passivering.pbs
 
 source system.sh
 
