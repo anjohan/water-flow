@@ -23,7 +23,7 @@ echo "log log.passivering
     boundary p p p
     atom_style	molecular
 
-    read_restart klartilpassivering.restart
+    read_data klartilpassivering.data
 
     pair_style  usc
     pair_coeff  * * ../SiOH2O.vashishta Si O H
@@ -34,7 +34,7 @@ echo "log log.passivering
     mass            3 1.00794
 
     thermo 10
-    thermo_style custom step time temp press pzz etotal c_mass_center[1] c_mass_center[3] c_normalkraft cpuremain
+    thermo_style custom step time temp press pzz etotal cpuremain
 
     fix passivate all passivate
     run 1

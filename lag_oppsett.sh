@@ -116,4 +116,5 @@ echo "log log.oppsett
     # group kanbevegeseg union kanbevegeseg OHgrupper
 
     write_restart klartilpassivering.restart
+    write_data klartilpassivering.data
     " > data/oppsett.in
