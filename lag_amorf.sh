@@ -70,6 +70,6 @@ echo "log log.amorf
     fix termostat all nvt temp $T $T 1.0
     run ${anttermaliseringslutt}
 
-    write_data ../amorf.data
+    write_data amorf.data
     write_restart amorf.restart
     " > data/amorf.in

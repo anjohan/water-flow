@@ -39,7 +39,7 @@ echo "log log.oppsett
     boundary p p p
     atom_style molecular
 
-    read_data ../amorf.data
+    read_data amorf.data
 
     # pair_style  usc
     # pair_coeff  * * ../SiOH2O.vashishta Si O H

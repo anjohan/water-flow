@@ -15,9 +15,9 @@ with open(".sylinderradius.dat", "r") as fil:
 with open(".sylinderhoyde.dat", "r") as fil:
     h = float(fil.read())
 
-tetthet = 0.9  # g/cm³
+tetthet = 0.9  # g/cm3
 massepervann = 18*1.67E-24  # g/atom
-volum = (x*y - pi*R**2)*h*1E-24  # cm³
+volum = (x*y - pi*R**2)*h*1E-24  # cm3
 antall = volum*tetthet/massepervann  # atomer
 antall = int(round(antall))
 
