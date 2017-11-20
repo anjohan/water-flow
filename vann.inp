@@ -1,8 +1,8 @@
 tolerance 2.0
 
-output data/medvann.pdb
-
 filetype xyz
+output data/medvann.xyz
+
 
 nloop 10000
 

@@ -21,7 +21,7 @@ sluttant=$(py "${sluttid}/${dt}")
 dumpperiode=10000
 langdumpperiode=$(py "${dumpperiode}*10")
 
-echo "log log.oppsett
+echo "log log.vann
     #/atom 1 silicon
     #/atom 2 oxygen
     #/atom 3 hydrogen
@@ -59,16 +59,16 @@ echo "log log.oppsett
     group kanbevegeseg subtract all hardbunn
 
     thermo 100
-    thermo_style custom step time temp press pzz etotal spcpu cpuremain
+    thermo_style custom step time temp ke pe etotal press pzz spcpu cpuremain
     dump lagring all custom ${dumpperiode} vann.in.bin id type x y z
     dump sjeldenlagring all custom ${langdumpperiode} vannlavfrekv.in.bin id type x y z
 
     minimize 1e-6 1e-6 1000 1000
 
-    write_data medvann_minimert.data
+    write_data 01_medvann_minimert.data
 
     fix termostat kanbevegeseg nvt temp $T $T 1.0
-    velocity kanbevegeseg create $T 277385 mom yes loop geom
+    velocity kanbevegeseg create 600 277385 mom yes loop geom
 
     group silisium type 1
     group oksygen type 2
@@ -83,5 +83,7 @@ echo "log log.oppsett
     dump veldighyppiglagring all custom 100 vannveldighoyfrekv.in.bin id type x y z
 
     run ${sluttant}
+
+    write_data 02_medvann_1.1ns.data
 
     " > data/vann.in
