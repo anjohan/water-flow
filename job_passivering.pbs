@@ -8,7 +8,7 @@
 #PBS -d .
 
 
-source /usr/usc/cuda/8.0/setup.sh
+source /home/rcf-40/ankitmis/.bashrc
 source /usr/usc/intel/default/setup.sh
 source /usr/usc/openmpi/1.8.8/setup.sh.intel
 
@@ -18,7 +18,7 @@ date
 np=$(cat $PBS_NODEFILE | wc -l)
 
 #mpirun -np 1 ~/.unlimited.sh ./qxmd_mpi > log.qxmd
-mpirun -np 1 /staging/pv/ankitmis/Anders/lammps/src/lmp_mpi -in passivering.in > log
+mpirun -np 1 lammps -in passivering.in > log
 
 date
 echo "simulation finished **************************************"

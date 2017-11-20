@@ -4,11 +4,11 @@ def finndata(filnavn="log.lammps",l0="Step Time",l1="Loop time",verbose=False):
     N = len(linjer)
     data = {}
 
-    for i in xrange(N):
+    for i in range(N):
         l = linjer[i]
         if l0 in l:
             if verbose:
-                print l
+                print(l)
             titler = l.split()
             for ord in titler:
                 if not ord in data.keys():
@@ -38,7 +38,6 @@ def smooth(y,bredde):
 if __name__=="__main__":
     from matplotlib.pyplot import *
     from argparse import *
-    import cPickle
 
     parser = ArgumentParser("Skript som plotter filer med log.lammps-format.")
 
@@ -82,5 +81,5 @@ if __name__=="__main__":
             N=len(x)
             if args.dumpnum == 0:
                 args.dumpnum = N
-            for i in xrange(0,N,N/args.dumpnum):
+            for i in range(0,N,N/args.dumpnum):
                 fil.write("%g %g\n" % (x[i],y[i]))
