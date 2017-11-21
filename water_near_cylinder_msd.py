@@ -150,7 +150,11 @@ if args.d:
         current_IDs = data.particle_properties["ParticleIdentifier"]
         current_positions = data.particle_properties["Position"]
         current_sorted_indices = np.argsort(current_IDs)
+        #current_IDs =
         current_positions = current_positions[current_sorted_indices]
+
+        #TODO
+        water = (current_positions[:,2] > z) *
 
         for k in range(1, max_frames_per_window):
             future_data = pipeline.compute(t0_frames[i] + k*skip_frames)
