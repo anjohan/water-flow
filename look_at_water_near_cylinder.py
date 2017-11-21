@@ -105,7 +105,7 @@ coloring.end_value = max(radii)
 if args.d:
     num_timesteps = num_frames - int(num_frames/2)
 
-    num_bins = 200
+    num_bins = int(x - R)
     bin_edges = np.linspace(R, d, num_bins)
     mean_displacements = np.zeros(num_bins - 1)
     bin_mids = (bin_edges[1:] + bin_edges[:-1])/2
