@@ -1,28 +1,17 @@
 from argparse import ArgumentParser
+import sys
 import time
 from ovito.io import import_file
 from ovito.pipeline import FileSource
 import ovito.modifiers as mods
 import matplotlib.pyplot as plt
 import numpy as np
+import pdb
 
 if 1 < 0:
     a = FileSource()
     time.time()
-
-parser = ArgumentParser()
-parser.add_argument("-i", default="data/vann.in.bin", help="Datafile to read")
-parser.add_argument("-d", default=False, action="store_true", help="Calc. displacements")
-parser.add_argument("-o", default="./data/displ_vs_R.png", help="Plot output")
-args = parser.parse_args()
-
-pipeline = import_file(args.i, multiple_frames=True,
-                       columns=["Particle Identifier", "Particle Type",
-                                "Position.X", "Position.Y", "Position.Z"])
-
-pipeline.add_to_scene()
-
-num_frames = pipeline.source.num_frames
+    sys.exit()
 
 x = float(open(".x.dat", "r").read())
 y = float(open(".y.dat", "r").read())
@@ -30,6 +19,25 @@ z = float(open(".toppavbunn.dat", "r").read())
 R = float(open(".sylinderradius.dat", "r").read())
 d = min(x/2, y/2)
 
+parser = ArgumentParser()
+parser.add_argument("-i", default="data/vann.in.bin", help="Datafile to read")
+parser.add_argument("-d", default=False, action="store_true", help="Calc. displacements")
+parser.add_argument("-o", default="./data/displ_vs_R.png", help="Plot output")
+parser.add_argument("--window_length", default=200, type=float)
+parser.add_argument("--t0_distance", default=100, type=float)
+parser.add_argument("--bin_radius", default=5, type=float)
+parser.add_argument("--max_bin_radius", default=d-R, type=float)
+parser.add_argument("--frames_per_window", default=4, type=int)
+parser.add_argument("--pdb", default=False, action="store_true")
+args = parser.parse_args()
+
+pipeline = import_file(args.i, multiple_frames=True,
+                       columns=["ParticleIdentifier", "Particle Type",
+                                "Position.X", "Position.Y", "Position.Z"])
+
+pipeline.add_to_scene()
+
+num_frames = pipeline.source.num_frames
 
 """
 moving = mods.AffineTransformationModifier(transformation=[[1, 0, 0, -x/2],
@@ -104,74 +112,82 @@ pipeline.modifiers.append(interesting_water)
 
 if args.d:
     dt = 0.0005
-    num_timesteps = num_frames - int(num_frames/2)
     time_per_frame = dt * (pipeline.compute(num_frames-1).attributes["Timestep"]
                            - pipeline.compute(num_frames-2).attributes["Timestep"])
     total_time = time_per_frame * num_frames
 
-    time_between_t0s = 10  # HENT FRA VACF
+    time_between_t0s = args.t0_distance  # HENT FRA VACF
     frames_between_t0s = int(round(time_between_t0s/time_per_frame))
 
-    first_t0 = 1000  # WHEN EQUILIBRIATED
+    first_t0 = 400  # WHEN EQUILIBRIATED
     first_t0_frame = int(round(first_t0/time_per_frame))
 
-    time_window = 50  # GJETNING
+    max_frames_per_window = args.frames_per_window  # REDUCE RUNTIME
+    time_window = args.window_length  # GJETNING
     frames_per_window = int(time_window/time_per_frame)
-    frame_values = np.arange(frames_per_window)
-    time_values = frame_values * dt
+    skip_frames = int((frames_per_window-1)/(max_frames_per_window-1))
+    frame_values = np.arange(0, frames_per_window, skip_frames)
+    time_values = frame_values * time_per_frame
 
-    t0_frames = np.arange(first_t0_frame, num_frames, frames_per_window)
+    t0_frames = np.arange(first_t0_frame, num_frames - frames_per_window, frames_between_t0s)
     num_windows = len(t0_frames)
 
-    num_bins = int((d - R)/10)  # Ca. 1 nm per bin
-    bin_edges = np.linspace(R, d, num_bins+1)
-    mean_displacements = np.zeros((num_bins, frames_per_window))
+    print("num_windows = ", num_windows)
+    print("num_frames_per_window = ", frames_per_window)
+
+    num_bins = int(round(args.max_bin_radius/args.bin_radius))  # Ca. 0.5 nm per bin
+    bin_edges = np.linspace(R, R+args.max_bin_radius, num_bins+1)
+    mean_displacements = np.zeros((num_bins, max_frames_per_window))
     bin_mids = (bin_edges[1:] + bin_edges[:-1])/2
 
-    for i in range(1, frames_per_window):
-        mod = mods.CalculateDisplacementsModifier(use_frame_offset=True,
-                                                  frame_offset=i)
-        pipeline.modifiers.append(mod)
-        displacement = mods.ComputePropertyModifier(output_property="Displacement%d" % i,
-                                                    expressions=["DisplacementMagnitude"])
-        pipeline.modifiers.append(displacement)
+    if args.pdb:
+        pdb.set_trace()
 
     for i in range(num_windows):
-        print("Time window %4d of %4d" % (i+1, num_windows))
-        data = pipeline.compute(i)
-        radii = data.particle_properties["DistanceFromCenter"]
+        t0 = time.time()
+        data = pipeline.compute(t0_frames[i])
+        t1 = time.time()
+        current_IDs = data.particle_properties["ParticleIdentifier"]
+        current_positions = data.particle_properties["Position"]
+        current_sorted_indices = np.argsort(current_IDs)
+        current_positions = current_positions[current_sorted_indices]
 
-        sorted_indices = np.argsort(radii)
-        radii = radii[sorted_indices]
+        for k in range(1, max_frames_per_window):
+            future_data = pipeline.compute(t0_frames[i] + k*skip_frames)
+            future_IDs = future_data.particle_properties["ParticleIdentifier"]
+            future_positions = future_data.particle_properties["Position"]
+            future_sorted_indices = np.argsort(future_IDs)
+            future_positions = future_positions[future_sorted_indices]
+            displacements = np.linalg.norm(future_positions - current_positions, axis=1)
 
-        lower_index = 0
-        for j in range(num_bins-1):
-            print("Bin %3d of %3d" % (j+1, num_bins))
-            index_step = np.searchsorted(radii[lower_index:], bin_edges[i+1])
-            upper_index = lower_index + index_step
-            lower_index = upper_index
-            for k in range(1, frames_per_window):
-                print("Time value %3d of %3d" % (k+1, frames_per_window))
-                displacements = data.particle_properties["Displacement%d" % k][sorted_indices]
+            for j in range(num_bins-1):
+                radii = data.particle_properties["DistanceFromCenter"][current_sorted_indices]
+                sorted_indices = np.argsort(radii)
+                radii = radii[sorted_indices]
+
+                lower_index = np.searchsorted(radii, bin_edges[0])
+                print("Time window %4d of %4d" % (i+1, num_windows), end="    ")
+                print("Bin %3d of %3d" % (j+1, num_bins-1), end="    ")
+                print("Time value %3d of %3d" % (k+1, max_frames_per_window))
+                index_step = np.searchsorted(radii[lower_index:], bin_edges[j+1])
+                assert index_step != 0
+                upper_index = lower_index + index_step
+
                 mean_displacements[j, k] += displacements[lower_index:upper_index].mean()
+                lower_index = upper_index
     mean_displacements /= num_windows
 
-    """
-    txt = "%3d out of %d:    Ovito: %6.5s s" % (i, num_windows, t1-t0)
-    txt += "    Indexing: %6.5s s    Displacement: %6.5s s" % (t2-t1, t3-t2)
-    print(txt)
-    """
-
-    mean_displacements /= num_timesteps
+    bin_edges -= R
 
     for i in range(num_bins-1):
+        print(len(time_values), len(mean_displacements[i]))
         plt.plot(time_values, mean_displacements[i], "-",
-                 label=r"Distance from cylinder $\in [%.2f\ \mathrm{nm}, %.2f\ \mathrm{nm}]"
+                 label=r"Distance from cylinder $\in$ [%.2f nm, %.2f nm]"
                        % (bin_edges[i]/10, bin_edges[i+1]/10))
 
     plt.xlabel("t [ps]")
     plt.ylabel("Mean square displacement [Å]")
     plt.title("Time-averaged mean displacement vs radius")
-    plt.legend()
+    plt.legend(loc="best")
     plt.savefig(args.o)
     plt.show()
