@@ -62,6 +62,10 @@ echo "log log.vann
 
     group vann subtract kanbevegeseg bunn sylinder
 
+    timestep ${dt}
+    minimize 1e-6 1e-6 1000 1000
+    write_data 01_medvann_minimert.data
+
     compute potperatom all pe/atom
     compute inndeling all chunk/atom bin/3d x lower ${dx} y lower ${dx} z lower ${dx}
 
@@ -69,27 +73,19 @@ echo "log log.vann
     compute temperatur_i_min_chunk all global/atom c_inndeling c_temperatur
 
     compute stress_x_V_per_atom all stress/atom NULL ke pair
-    fix stress_x_V_per_chunk all ave/chunk 100 100 10000 inndeling c_stress_x_V_per_atom[1] c_stress_x_V_per_atom[2] c_stress_x_V_per_atom[3] norm sample
+    fix stress_x_V_per_chunk all ave/chunk 10 10 100 inndeling c_stress_x_V_per_atom[1] c_stress_x_V_per_atom[2] c_stress_x_V_per_atom[3] norm sample file stress_x_V_per_chunk.profile
     compute stress_x_V_i_min_chunk all global/atom c_inndeling f_stress_x_V_per_chunk[*]
 
     variable trykk_i_min_chunk atom '-(c_stress_x_V_i_min_chunk[1]+c_stress_x_V_i_min_chunk[2]+c_stress_x_V_i_min_chunk[3])/(3*${Vperchunk})'
 
-    timestep ${dt}
-    minimize 1e-6 1e-6 1000 1000
-
     fix termostat kanbevegeseg nvt temp $T $T 1.0
     velocity kanbevegeseg create 600 277385 mom yes loop geom
-
-    run 100
 
     compute vacf vann vacf
     thermo 100
     thermo_style custom step time temp ke pe etotal press pzz spcpu cpuremain c_vacf[4]
     dump lagring all custom ${dumpperiode} vann.in.bin id type x y z c_potperatom c_temperatur_i_min_chunk v_trykk_i_min_chunk
     dump sjeldenlagring all custom ${langdumpperiode} vannlavfrekv.in.bin id type x y z c_potperatom c_temperatur_i_min_chunk v_trykk_i_min_chunk
-
-
-    write_data 01_medvann_minimert.data
 
 
 

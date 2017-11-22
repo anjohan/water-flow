@@ -8,7 +8,6 @@
 #PBS -d .
 
 
-source /home/rcf-40/ankitmis/.bashrc
 source /usr/usc/intel/default/setup.sh
 source /usr/usc/openmpi/default/setup.sh.intel
 
@@ -18,7 +17,7 @@ date
 np=$(cat $PBS_NODEFILE | wc -l)
 
 #mpirun -np 1 ~/.unlimited.sh ./qxmd_mpi > log.qxmd
-mpirun -np 128 lammps -in amorf.in > log
+mpirun -np 128 /staging/pv/ankitmis/Anders/lammps/src/lmp_intel_cpu_openmpi -in amorf.in > log
 
 date
 echo "simulation finished **************************************"
