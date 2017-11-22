@@ -10,6 +10,7 @@ fi
 
 cp job.sh data/
 cp job_vann.pbs data/job_vann.pbs
+cp job_fram_vann.sh data/job_fram_vann.sh
 
 source system.sh
 
