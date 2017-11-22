@@ -8,6 +8,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pdb
 
+plt.figure(figsize=(8, 6))
+
 if 1 < 0:
     a = FileSource()
     time.time()
@@ -32,7 +34,7 @@ parser.add_argument("--pdb", default=False, action="store_true")
 args = parser.parse_args()
 
 pipeline = import_file(args.i, multiple_frames=True,
-                       columns=["ParticleIdentifier", "Particle Type",
+                       columns=["ParticleIdentifier", "ParticleType",
                                 "Position.X", "Position.Y", "Position.Z"])
 
 pipeline.add_to_scene()
@@ -119,12 +121,14 @@ if args.d:
     time_between_t0s = args.t0_distance  # HENT FRA VACF
     frames_between_t0s = int(round(time_between_t0s/time_per_frame))
 
-    first_t0 = 400  # WHEN EQUILIBRIATED
+    first_t0 = 200  # WHEN EQUILIBRIATED
     first_t0_frame = int(round(first_t0/time_per_frame))
 
     max_frames_per_window = args.frames_per_window  # REDUCE RUNTIME
     time_window = args.window_length  # GJETNING
     frames_per_window = int(time_window/time_per_frame)
+    if max_frames_per_window > frames_per_window:
+        max_frames_per_window = frames_per_window
     skip_frames = int((frames_per_window-1)/(max_frames_per_window-1))
     frame_values = np.arange(0, frames_per_window, skip_frames)
     time_values = frame_values * time_per_frame
@@ -150,31 +154,35 @@ if args.d:
         current_IDs = data.particle_properties["ParticleIdentifier"]
         current_positions = data.particle_properties["Position"]
         current_sorted_indices = np.argsort(current_IDs)
-        #current_IDs =
         current_positions = current_positions[current_sorted_indices]
+        current_radii = data.particle_properties["DistanceFromCenter"][current_sorted_indices]
+        current_types = data.particle_properties["ParticleType"][current_sorted_indices]
 
-        #TODO
-        water = (current_positions[:,2] > z) *
+        water = (current_positions[:, 2] > z) * (current_radii > R)
+        water *= (current_radii < args.max_bin_radius + R) * (current_types > 1)
+        water_indices = np.where(water > 0)
+
+        current_positions = current_positions[water_indices]
 
         for k in range(1, max_frames_per_window):
             future_data = pipeline.compute(t0_frames[i] + k*skip_frames)
             future_IDs = future_data.particle_properties["ParticleIdentifier"]
             future_positions = future_data.particle_properties["Position"]
             future_sorted_indices = np.argsort(future_IDs)
-            future_positions = future_positions[future_sorted_indices]
+            future_positions = future_positions[future_sorted_indices][water_indices]
             displacements = np.linalg.norm(future_positions - current_positions, axis=1)
 
-            for j in range(num_bins-1):
+            for j in range(num_bins):
                 radii = data.particle_properties["DistanceFromCenter"][current_sorted_indices]
+                radii = radii[water_indices]
                 sorted_indices = np.argsort(radii)
                 radii = radii[sorted_indices]
 
                 lower_index = np.searchsorted(radii, bin_edges[0])
                 print("Time window %4d of %4d" % (i+1, num_windows), end="    ")
-                print("Bin %3d of %3d" % (j+1, num_bins-1), end="    ")
+                print("Bin %3d of %3d" % (j+1, num_bins), end="    ")
                 print("Time value %3d of %3d" % (k+1, max_frames_per_window))
                 index_step = np.searchsorted(radii[lower_index:], bin_edges[j+1])
-                assert index_step != 0
                 upper_index = lower_index + index_step
 
                 mean_displacements[j, k] += displacements[lower_index:upper_index].mean()
@@ -183,8 +191,7 @@ if args.d:
 
     bin_edges -= R
 
-    for i in range(num_bins-1):
-        print(len(time_values), len(mean_displacements[i]))
+    for i in range(num_bins):
         plt.plot(time_values, mean_displacements[i], "-",
                  label=r"Distance from cylinder $\in$ [%.2f nm, %.2f nm]"
                        % (bin_edges[i]/10, bin_edges[i+1]/10))
@@ -192,6 +199,6 @@ if args.d:
     plt.xlabel("t [ps]")
     plt.ylabel("Mean square displacement [Å]")
     plt.title("Time-averaged mean displacement vs radius")
-    plt.legend(loc="best")
-    plt.savefig(args.o)
+    plt.legend(loc="center left", bbox_to_anchor=(1, 0.5))
+    plt.savefig(args.o, bbox_inches="tight")
     plt.show()
