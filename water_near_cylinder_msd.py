@@ -36,10 +36,10 @@ parser.add_argument("--frames_per_window", default=-1, type=int)
 parser.add_argument("--pdb", default=False, action="store_true")
 parser.add_argument("-r", "--radial", default=False, action="store_true")
 parser.add_argument("-p", "--progress", default=False, action="store_true")
-parser.add_argument("--columns", nargs="+",
-                    default=["Particle Identifier", "Particle Type",
-                             "Position.X", "Position.Y", "Position.Z"])
+parser.add_argument("--extra_columns", nargs="+", default=[])
 args = parser.parse_args()
+columns = ["Particle Identifier", "Particle Type", "Position.X", "Position.Y",
+           "Position.Z"] + args.extra_columns
 
 if not args.progress:
     def trange(*args, **kwargs):
@@ -50,7 +50,7 @@ loaded = True
 pipeline = ovito.dataset.selected_pipeline
 if pipeline is None:
     assert args.i is not None
-    pipeline = import_file(args.i, multiple_frames=True, columns=args.columns)
+    pipeline = import_file(args.i, multiple_frames=True, columns=columns)
     pipeline.add_to_scene()
     ovito.dataset.save(args.i + ".ovito")
     loaded = False
