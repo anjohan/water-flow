@@ -70,14 +70,11 @@ echo "log log.vann
     compute potperatom all pe/atom
     compute inndeling all chunk/atom bin/3d x lower ${dx} y lower ${dx} z lower ${dx}
 
-    compute temperatur all temp/chunk inndeling temp
-    compute temperatur_i_min_chunk all global/atom c_inndeling c_temperatur
-
     compute stress_x_V_per_atom all stress/atom NULL ke pair
-    fix stress_x_V_per_chunk all ave/chunk 10 10 100 inndeling c_stress_x_V_per_atom[1] c_stress_x_V_per_atom[2] c_stress_x_V_per_atom[3] norm sample file stress_x_V_per_chunk.profile
-    compute stress_x_V_i_min_chunk all global/atom c_inndeling f_stress_x_V_per_chunk[*]
+    variable trykk_per_chunk atom '-(c_stress_x_V_per_atom[1]+c_stress_x_V_per_atom[2]+c_stress_x_V_per_atom[3])/(3*${Vperchunk})'
 
-    variable trykk_i_min_chunk atom '-(c_stress_x_V_i_min_chunk[1]+c_stress_x_V_i_min_chunk[2]+c_stress_x_V_i_min_chunk[3])/(3*${Vperchunk})'
+    fix temp_per_chunk all ave/chunk 100 100 10000 inndeling temp file temp_per_chunk.profile
+    fix trykk_per_chunk all ave/chunk 100 100 10000 inndeling v_trykk_per_chunk norm sample file trykk_per_chunk.profile
 
     fix termostat kanbevegeseg nvt temp $T $T 1.0
     velocity kanbevegeseg create 600 277385 mom yes loop geom
@@ -85,20 +82,13 @@ echo "log log.vann
     compute vacf vann vacf
     thermo 100
     thermo_style custom step time temp ke pe etotal press pzz spcpu cpuremain c_vacf[4]
-    dump lagring all custom ${dumpperiode} vann.in.bin id type x y z c_potperatom c_temperatur_i_min_chunk v_trykk_i_min_chunk
-    dump sjeldenlagring all custom ${langdumpperiode} vannlavfrekv.in.bin id type x y z c_potperatom c_temperatur_i_min_chunk v_trykk_i_min_chunk
-
-
+    dump lagring all custom ${dumpperiode} vann.in.bin id type x y z xu yu zu c_potperatom
+    dump sjeldenlagring all custom ${langdumpperiode} vannlavfrekv.in.bin id type x y z xu yu zu c_potperatom
 
     restart 100000 vann.*.restart
 
     run ${ant}
 
-    dump hyppiglagring all custom 1000 vannhoyfrekv.in.bin id type x y z c_potperatom c_temperatur_i_min_chunk v_trykk_i_min_chunk
-    dump veldighyppiglagring all custom 100 vannveldighoyfrekv.in.bin id type x y z c_potperatom c_temperatur_i_min_chunk v_trykk_i_min_chunk
-
-    run ${sluttant}
-
-    write_data 02_medvann_1.1ns.data
+    write_data 02_medvann_${tid}ps.data
 
     " > data/vann.in
