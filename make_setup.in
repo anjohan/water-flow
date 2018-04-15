@@ -1,0 +1,84 @@
+include system.in
+
+variable dt equal ${dt_nowater}
+variable simulation_time equal 100
+variable num_stepsequal ${simulation_time}/${dt}
+
+variable num_dumps equal 100
+variable dumpfrequency equal ${num_steps}/${num_dumps}
+
+log log.setup
+#/atom 1 silicon
+#/atom 2 oxygen
+#/atom 3 hydrogen
+#/bond 1 2 2.6
+#/bond 2 3 1.4
+
+units metal
+boundary p p p
+atom_style molecular
+
+read_data amorphous.data
+
+# pair_style  usc
+# pair_coeff  * * ../SiOH2O.vashishta Si O H
+# pair_modify coord 2 1 2.0 0.3
+# pair_modify coord 2 3 1.4 0.3
+pair_style vashishta
+pair_coeff	* * ../SiO2.vashishta Si O
+mass            1 28.08
+mass            2 15.9994
+#mass            3 1.00794
+
+include common_regions_groups.in
+
+group tobekept union slab cylinder
+group tobedeleted subtract all tobekept
+
+delete_atoms group tobedeleted
+
+group moving subtract all rigidslab
+
+
+thermo 10
+thermo_style custom step time temp press pzz etotal cpuremain
+dump lagring all custom ${dumpfrequency} setup.in.bin id type x y z
+
+group silicon type 1
+group oxygen type 2
+
+variable num_silicon equal count(silicon)
+variable num_oxygen equal count(oxygen)
+variable num_siliconx2 equal '2*count(silicon)'
+
+region tobefilled union 2 slab cylinder side out
+group preexisting region entire_system
+
+if '$(v_num_oxygen % 2)' then &
+    "create_atoms 2 random 1 142857 tobefilled"
+
+group oxygen type 2
+
+if '${num_oxygen} > ${num_siliconx2}' then &
+    "variable num_silicon_missing equal '(v_num_oxygen - v_num_siliconx2)/2'" &
+    "create_atoms 1 random ${num_silicon_missing} 142858 tobefilled" &
+elif '${num_oxygen} < ${num_siliconx2}' &
+    "variable num_oxygen_missing equal 'v_num_siliconx2 - v_num_oxygen'" &
+    "create_atoms 2 random ${num_oxygen_missing} 142858 tobefilled"
+
+group newatoms subtract all preexisting
+group moving union newatoms
+
+minimize 1e-6 1e-6 1000 1000
+
+fix thermostat moving nvt temp $T $T 1.0
+velocity moving create $T 277385 mom yes loop geom
+
+group silicon type 1
+group oxygen type 2
+
+timestep ${dt}
+run ${num_steps}
+
+write_restart unpassivated.restart
+write_data unpassivated.data

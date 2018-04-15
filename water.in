@@ -1,0 +1,66 @@
+include system.in
+
+variable tid equal 3000
+variable sluttid equal 100
+variable ant equal ${tid}/${dt}
+variable sluttant equal ${sluttid}/${dt}
+
+variable dumpperiode equal 10000
+variable langdumpperiode equal ${dumpperiode}*10
+variable dx equal ${x}/30
+variable Vperchunk equal ${dx}**3
+
+log log.water
+#/atom 1 silicon
+#/atom 2 oxygen
+#/atom 3 hydrogen
+#/bond 1 2 2.6
+#/bond 2 3 1.4
+
+units metal
+boundary p p p
+atom_style atomic
+
+read_data withwater.data
+
+pair_style  usc
+pair_coeff  * * ../SiOH2O.vashishta Si O H
+pair_modify coord 2 1 2.0 0.3
+pair_modify coord 2 3 1.4 0.3
+mass            1 28.08
+mass            2 15.9994
+mass            3 1.00794
+
+include common_regions_groups.in
+group moving subtract all rigidslab
+
+group water subtract moving slab cylinder
+
+timestep ${dt}
+minimize 1e-6 1e-6 1000 1000
+write_data 01_withwater_minimert.data
+
+compute potperatom all pe/atom
+compute inndeling all chunk/atom bin/3d x lower ${dx} y lower ${dx} z lower ${dx}
+
+compute stress_x_V_per_atom all stress/atom NULL ke pair
+variable trykk_per_chunk atom '-(c_stress_x_V_per_atom[1]+c_stress_x_V_per_atom[2]+c_stress_x_V_per_atom[3])/(3*${Vperchunk})'
+
+fix temp_per_chunk all ave/chunk 100 100 10000 inndeling temp file temp_per_chunk.profile
+fix trykk_per_chunk all ave/chunk 100 100 10000 inndeling v_trykk_per_chunk norm sample file trykk_per_chunk.profile
+
+fix termostat moving nvt temp $T $T 1.0
+velocity moving create 600 277385 mom yes loop geom
+
+compute vacf water vacf
+thermo 100
+thermo_style custom step time temp ke pe etotal press pzz spcpu cpuremain c_vacf[4]
+dump lagring all custom ${dumpperiode} water.in.bin id type x y z xu yu zu c_potperatom
+dump sjeldenlagring all custom ${langdumpperiode} waterlavfrequency.in.bin id type x y z xu yu zu c_potperatom
+
+restart 100000 water.*.restart
+
+run ${ant}
+
+write_data 02_withwater_${tid}ps.data
+
