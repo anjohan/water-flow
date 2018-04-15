@@ -1,6 +1,6 @@
 settings.outformat = "pdf";
 settings.prc = false;
-settings.render = 4;
+settings.render = 16;
 size(16cm,16cm);
 import three;
 import graph3;
@@ -45,7 +45,7 @@ draw((Lx,Ly,3*bottomthickness)--(Lx,Ly,totalheight),black+dashed);
 
 draw((0,0,totalheight)--(Lx,0,totalheight)--(Lx,Ly,totalheight)--(0,Ly,totalheight)--cycle,black+dashed);
 
-draw((Lx/2,Lx/2,totalheight)--(Lx/2,Ly/2+radius,totalheight),black+dashed,L=Label("$R="+lengthtext(radius)+"$",align=N));
+draw((Lx/2,Lx/2,totalheight)--(Lx/2,Ly/2+radius,totalheight),black+dashed,L=Label("$R="+lengthtext(radius)+"$",align=2N));
 draw((Lx,0,0.5*bottomthickness),black,L=Label("$d = "+lengthtext(bottomthickness)+"$",align=W,position=0.5));
 draw((Lx,0,1.5*bottomthickness),black,L=Label("$d = "+lengthtext(bottomthickness)+"$",align=W,position=0.5));
 draw((Lx,0,2.5*bottomthickness),black,L=Label("$d = "+lengthtext(bottomthickness)+"$",align=W,position=0.5));
