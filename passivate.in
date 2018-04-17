@@ -1,4 +1,4 @@
-log log.passivate
+log data/log.passivate
 #/atom 1 silicon
 #/atom 2 oxygen
 #/atom 3 hydrogen
@@ -9,7 +9,7 @@ units metal
 boundary p p p
 atom_style	molecular
 
-read_data unpassivatedwithH.data
+read_data data/unpassivatedwithH.data
 
 pair_style  usc
 pair_coeff  * * SiOH2O.vashishta Si O H
@@ -26,5 +26,5 @@ fix passivate all passivate
 run 1
 unfix passivate
 
-write_restart passivated.restart
-write_dump all xyz passivated.xyz
+write_restart data/passivated.restart
+write_dump all xyz data/passivated.xyz

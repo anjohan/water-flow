@@ -9,7 +9,7 @@ variable longdumpperiod equal ${dumpperiod}*10
 variable dx equal ${x}/30
 variable Vperchunk equal ${dx}**3
 
-log log.water
+log data/log.water
 #/atom 1 silicon
 #/atom 2 oxygen
 #/atom 3 hydrogen
@@ -20,7 +20,7 @@ units metal
 boundary p p p
 atom_style atomic
 
-read_data withwater.data
+read_data data/withwater.data
 
 pair_style  usc
 pair_coeff  * * SiOH2O.vashishta Si O H
@@ -37,7 +37,7 @@ group water subtract moving slab cylinder
 
 timestep ${dt}
 minimize 1e-6 1e-6 1000 1000
-write_data 01_withwater_minimert.data
+write_data data/01_withwater_minimert.data
 
 compute potperatom all pe/atom
 compute binning all chunk/atom bin/3d x lower ${dx} y lower ${dx} z lower ${dx}
@@ -45,8 +45,8 @@ compute binning all chunk/atom bin/3d x lower ${dx} y lower ${dx} z lower ${dx}
 compute stress_x_V_per_atom all stress/atom NULL ke pair
 variable pressure_per_chunk atom '-(c_stress_x_V_per_atom[1]+c_stress_x_V_per_atom[2]+c_stress_x_V_per_atom[3])/(3*${Vperchunk})'
 
-fix temp_per_chunk all ave/chunk 100 100 10000 binning temp file temp_per_chunk.profile
-fix pressure_per_chunk all ave/chunk 100 100 10000 binning v_pressure_per_chunk norm sample file pressure_per_chunk.profile
+fix temp_per_chunk all ave/chunk 100 100 10000 binning temp file data/temp_per_chunk.profile
+fix pressure_per_chunk all ave/chunk 100 100 10000 binning v_pressure_per_chunk norm sample file data/pressure_per_chunk.profile
 
 fix thermostat moving nvt temp $T $T 1.0
 velocity moving create 600 277385 mom yes loop geom
@@ -54,12 +54,12 @@ velocity moving create 600 277385 mom yes loop geom
 compute vacf water vacf
 thermo 100
 thermo_style custom step time temp ke pe etotal press pzz spcpu cpuremain c_vacf[4]
-dump dump all custom ${dumpperiod} water.in.bin id type x y z xu yu zu c_potperatom
-dump raredump all custom ${longdumpperiod} waterlowfrequency.in.bin id type x y z xu yu zu c_potperatom
+dump dump all custom ${dumpperiod} data/water.in.bin id type x y z xu yu zu c_potperatom
+dump raredump all custom ${longdumpperiod} data/waterlowfrequency.in.bin id type x y z xu yu zu c_potperatom
 
-restart 100000 water.*.restart
+restart 100000 data/water.*.restart
 
 run ${num_steps}
 
-write_data withwater_${total_time}ps.data
+write_data data/withwater_${total_time}ps.data
 

@@ -7,7 +7,7 @@ variable num_stepsequal ${simulation_time}/${dt}
 variable num_dumps equal 100
 variable dumpfrequency equal ${num_steps}/${num_dumps}
 
-log log.setup
+log data/log.setup
 #/atom 1 silicon
 #/atom 2 oxygen
 #/atom 3 hydrogen
@@ -18,7 +18,7 @@ units metal
 boundary p p p
 atom_style molecular
 
-read_data amorphous.data
+read_data data/amorphous.data
 
 # pair_style  usc
 # pair_coeff  * * SiOH2O.vashishta Si O H
@@ -42,7 +42,7 @@ group moving subtract all rigidslab
 
 thermo 10
 thermo_style custom step time temp press pzz etotal cpuremain
-dump lagring all custom ${dumpfrequency} setup.in.bin id type x y z
+dump lagring all custom ${dumpfrequency} data/setup.in.bin id type x y z
 
 group silicon type 1
 group oxygen type 2
@@ -80,5 +80,5 @@ group oxygen type 2
 timestep ${dt}
 run ${num_steps}
 
-write_restart unpassivated.restart
-write_data unpassivated.data
+write_restart data/unpassivated.restart
+write_data data/unpassivated.data
