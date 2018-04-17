@@ -12,7 +12,7 @@ atom_style	molecular
 read_data unpassivatedwithH.data
 
 pair_style  usc
-pair_coeff  * * ../SiOH2O.vashishta Si O H
+pair_coeff  * * SiOH2O.vashishta Si O H
 pair_modify coord 2 1 2.0 0.3
 pair_modify coord 2 3 1.4 0.3
 mass            1 28.08

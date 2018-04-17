@@ -1,12 +1,11 @@
 include system.in
 
-variable tid equal 3000
-variable sluttid equal 100
-variable ant equal ${tid}/${dt}
-variable sluttant equal ${sluttid}/${dt}
+variable dt equal ${dt_withwater}
+variable total_time equal 3000
+variable num_steps equal ${total_time}/${dt}
 
-variable dumpperiode equal 10000
-variable langdumpperiode equal ${dumpperiode}*10
+variable dumpperiod equal 10000
+variable longdumpperiod equal ${dumpperiod}*10
 variable dx equal ${x}/30
 variable Vperchunk equal ${dx}**3
 
@@ -24,7 +23,7 @@ atom_style atomic
 read_data withwater.data
 
 pair_style  usc
-pair_coeff  * * ../SiOH2O.vashishta Si O H
+pair_coeff  * * SiOH2O.vashishta Si O H
 pair_modify coord 2 1 2.0 0.3
 pair_modify coord 2 3 1.4 0.3
 mass            1 28.08
@@ -41,26 +40,26 @@ minimize 1e-6 1e-6 1000 1000
 write_data 01_withwater_minimert.data
 
 compute potperatom all pe/atom
-compute inndeling all chunk/atom bin/3d x lower ${dx} y lower ${dx} z lower ${dx}
+compute binning all chunk/atom bin/3d x lower ${dx} y lower ${dx} z lower ${dx}
 
 compute stress_x_V_per_atom all stress/atom NULL ke pair
-variable trykk_per_chunk atom '-(c_stress_x_V_per_atom[1]+c_stress_x_V_per_atom[2]+c_stress_x_V_per_atom[3])/(3*${Vperchunk})'
+variable pressure_per_chunk atom '-(c_stress_x_V_per_atom[1]+c_stress_x_V_per_atom[2]+c_stress_x_V_per_atom[3])/(3*${Vperchunk})'
 
-fix temp_per_chunk all ave/chunk 100 100 10000 inndeling temp file temp_per_chunk.profile
-fix trykk_per_chunk all ave/chunk 100 100 10000 inndeling v_trykk_per_chunk norm sample file trykk_per_chunk.profile
+fix temp_per_chunk all ave/chunk 100 100 10000 binning temp file temp_per_chunk.profile
+fix pressure_per_chunk all ave/chunk 100 100 10000 binning v_pressure_per_chunk norm sample file pressure_per_chunk.profile
 
-fix termostat moving nvt temp $T $T 1.0
+fix thermostat moving nvt temp $T $T 1.0
 velocity moving create 600 277385 mom yes loop geom
 
 compute vacf water vacf
 thermo 100
 thermo_style custom step time temp ke pe etotal press pzz spcpu cpuremain c_vacf[4]
-dump lagring all custom ${dumpperiode} water.in.bin id type x y z xu yu zu c_potperatom
-dump sjeldenlagring all custom ${langdumpperiode} waterlavfrequency.in.bin id type x y z xu yu zu c_potperatom
+dump dump all custom ${dumpperiod} water.in.bin id type x y z xu yu zu c_potperatom
+dump raredump all custom ${longdumpperiod} waterlowfrequency.in.bin id type x y z xu yu zu c_potperatom
 
 restart 100000 water.*.restart
 
-run ${ant}
+run ${num_steps}
 
-write_data 02_withwater_${tid}ps.data
+write_data withwater_${total_time}ps.data
 

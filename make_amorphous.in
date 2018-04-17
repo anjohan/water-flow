@@ -15,7 +15,7 @@ variable total_steps equal ${total_time}/${dt}
 variable total_dumps equal 100
 variable dump_frequency equal ${total_steps}/${total_dumps}
 
-log log.amorphous
+log data/log.amorphous
 #/atom 1 silicon
 #/atom 2 oxygen
 #/atom 3 hydrogen
@@ -33,7 +33,7 @@ read_data betacristobalite_noH.data
 replicate ${Lx} ${Ly} ${systemheight}
 
 pair_style vashishta
-pair_coeff	* * ../SiO2.vashishta Si O
+pair_coeff	* * SiO2.vashishta Si O
 mass            1 28.08
 mass            2 15.9994
 
@@ -58,5 +58,5 @@ run ${cooling_steps}
 fix termostat all nvt temp ${T} ${T} 1.0
 run ${thermalising_steps_final}
 
-write_data amorphous.data
-write_restart amorphous.restart
+write_data data/amorphous.data
+write_restart data/amorphous.restart
