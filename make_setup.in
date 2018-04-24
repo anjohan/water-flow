@@ -2,7 +2,7 @@ include system.in
 
 variable dt equal ${dt_nowater}
 variable simulation_time equal 100
-variable num_stepsequal ${simulation_time}/${dt}
+variable num_steps equal ${simulation_time}/${dt}
 
 variable num_dumps equal 100
 variable dumpfrequency equal ${num_steps}/${num_dumps}

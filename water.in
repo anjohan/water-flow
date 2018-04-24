@@ -1,4 +1,5 @@
 include system.in
+log data/log.water
 
 variable dt equal ${dt_withwater}
 variable total_time equal 3000
@@ -7,9 +8,9 @@ variable num_steps equal ${total_time}/${dt}
 variable dumpperiod equal 10000
 variable longdumpperiod equal ${dumpperiod}*10
 variable dx equal ${x}/30
-variable Vperchunk equal ${dx}**3
+variable Vperchunk equal ${dx}*${dx}*${dx}
+print ${Vperchunk} file "data/Vperchunk.dat"
 
-log data/log.water
 #/atom 1 silicon
 #/atom 2 oxygen
 #/atom 3 hydrogen
@@ -37,16 +38,16 @@ group water subtract moving slab cylinder
 
 timestep ${dt}
 minimize 1e-6 1e-6 1000 1000
-write_data data/01_withwater_minimert.data
+write_data data/01_withwater_minimised.data
 
 compute potperatom all pe/atom
 compute binning all chunk/atom bin/3d x lower ${dx} y lower ${dx} z lower ${dx}
 
 compute stress_x_V_per_atom all stress/atom NULL ke pair
-variable pressure_per_chunk atom '-(c_stress_x_V_per_atom[1]+c_stress_x_V_per_atom[2]+c_stress_x_V_per_atom[3])/(3*${Vperchunk})'
+# variable pressure_per_chunk atom '-(c_stress_x_V_per_atom[1]+c_stress_x_V_per_atom[2]+c_stress_x_V_per_atom[3])/(3*(${Vperchunk}))'
 
 fix temp_per_chunk all ave/chunk 100 100 10000 binning temp file data/temp_per_chunk.profile
-fix pressure_per_chunk all ave/chunk 100 100 10000 binning v_pressure_per_chunk norm sample file data/pressure_per_chunk.profile
+fix pressure_per_chunk all ave/chunk 100 100 10000 binning c_stress_x_V_per_atom[1] c_stress_x_V_per_atom[2] c_stress_x_V_per_atom[3] norm sample file data/stress_x_V_per_chunk.profile
 
 fix thermostat moving nvt temp $T $T 1.0
 velocity moving create 600 277385 mom yes loop geom

@@ -33,5 +33,5 @@ replacements = {
 for word, value in replacements.items():
     txt = txt.replace(word, str(value))
 
-with open("water.inp", "w") as fil:
+with open("data/water.inp", "w") as fil:
     fil.write(txt)
