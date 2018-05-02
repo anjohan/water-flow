@@ -2,7 +2,9 @@
 # Number of tasks (MPI ranks):
 #SBATCH --time='48:00:00'
 #SBATCH --account=nn9272k
-#SBATCH --nodes=32
+#SBATCH --nodes=8
+# #SBATCH --account=trocks
+# #SBATCH --nodes=5
 #SBATCH --ntasks-per-node=16
 #SBATCH --cpus-per-task=1
 #SBATCH --mail-type=ALL

@@ -2,7 +2,7 @@ include system.in
 log data/log.water
 
 variable dt equal ${dt_withwater}
-variable total_time equal 3000
+variable total_time equal 400
 variable num_steps equal ${total_time}/${dt}
 
 variable dumpperiod equal 10000
@@ -49,16 +49,20 @@ compute stress_x_V_per_atom all stress/atom NULL ke pair
 fix temp_per_chunk all ave/chunk 100 100 10000 binning temp file data/temp_per_chunk.profile
 fix pressure_per_chunk all ave/chunk 100 100 10000 binning c_stress_x_V_per_atom[1] c_stress_x_V_per_atom[2] c_stress_x_V_per_atom[3] norm sample file data/stress_x_V_per_chunk.profile
 
-fix thermostat moving nvt temp $T $T 1.0
-velocity moving create 600 277385 mom yes loop geom
+fix integrator moving nve
+velocity moving create ${T} 277385 mom yes loop geom
+
+fix externalforce water addforce 0.0001 0 0
+variable vcmx_water equal vcm(water,x)
 
 compute vacf water vacf
 thermo 100
-thermo_style custom step time temp ke pe etotal press pzz spcpu cpuremain c_vacf[4]
+thermo_style custom step time temp v_vcmx_water ke pe etotal press pzz spcpu cpuremain c_vacf[4]
 dump dump all custom ${dumpperiod} data/water.in.bin id type x y z xu yu zu c_potperatom
 dump raredump all custom ${longdumpperiod} data/waterlowfrequency.in.bin id type x y z xu yu zu c_potperatom
 
 restart 100000 data/water.*.restart
+
 
 run ${num_steps}
 
