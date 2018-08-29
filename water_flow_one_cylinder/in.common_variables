@@ -1,4 +1,4 @@
-log log.system
+log ${OUTDIR}/log.system
 variable a equal 7.16
 variable Lx equal 30
 variable Ly equal 30

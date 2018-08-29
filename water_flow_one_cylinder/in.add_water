@@ -1,0 +1,33 @@
+include ${INDIR}/in.common_variables
+log ${OUTDIR}/log.add_water
+read_restart ${OUTDIR}/restart.SiO2
+
+timestep ${dt_withwater}
+
+units metal
+boundary p p p
+atom_style atomic
+
+pair_style  usc
+pair_coeff  * * ${INDIR}/SiO2H2O.vashishta Si O H
+pair_modify coord 2 1 2.0 0.3
+pair_modify coord 2 3 1.4 0.3
+# pair_style vashishta
+# pair_coeff	* * SiO2.vashishta Si O
+mass            1 28.08
+mass            2 15.9994
+mass            3 1.00794
+
+thermo 1
+thermo_style custom step time temp press pzz etotal cpuremain
+
+group SiO2 union all
+
+read_dump ${OUTDIR}/dump.water 0 x y z replace no box no add yes
+
+group water subtract all SiO2
+group moving union water
+
+write_restart ${OUTDIR}/restart.water
+
+write_dump all custom ${OUTDIR}/dump.withwater

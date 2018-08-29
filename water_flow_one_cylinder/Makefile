@@ -1,40 +1,32 @@
-lammps = $(shell find ~ -name lmp_*mpi* 2> /dev/null)
+SHELL := /bin/bash
+indir = .
+outdir = data
+lammps = $(shell find ~ -name lmp_*mpi* 2> /dev/null) -var INDIR $(indir) -var OUTDIR $(outdir)
 
-log.system: system.in
-	$(lammps) -in system.in
+$(shell mkdir -p $(outdir))
 
-data/amorphous.data: make_amorphous.in system.in
-	mkdir -p data
-	date
-	mpirun $(lammps) -in make_amorphous.in  # 30 min on 128 cores
-	date
-data/unpassivated.data: data/amorphous.data system.in common_regions_groups.in make_setup.in
-	date
-	mpirun $(lammps) -in make_setup.in
-	date
-data/unpassivatedwithH.data: data/unpassivated.data fix_setup_addH.py
-	date
-	python fix_setup_addH.py
-	date
-data/passivated.xyz: data/unpassivated.data system.in common_regions_groups.in passivate.in
-	date
-	mpirun -np 1 $(lammps) -in passivate.in
-	date
-data/water.inp: packmol_template.inp water.py
-	date
-	$(lammps) -in system.in
-	python water.py
-	date
-data/withwater.xyz: data/passivated.xyz data/water.inp water.xyz
-	date
-	packmol < data/water.inp
-	date
-data/withwater.data: data/withwater.xyz withwater_xyztodata.py
-	date
-	$(lammps) -in system.in
-	python3 withwater_xyztodata.py
-	date
-data/water.in.bin: data/withwater.data water.in system.in common_regions_groups.in
-	date
-	mpirun $(lammps) -in water.in
-	date
+all: $(outdir)/done
+
+$(outdir)/data.amorphous: $(indir)/in.make_amorphous $(indir)/in.common_variables
+	mpirun $(lammps) -in $<
+
+$(outdir)/data.amorphous_withH: $(indir)/data_addH.py $(outdir)/data.amorphous
+	python $^ $@
+
+$(outdir)/restart.SiO2: $(indir)/in.setup $(outdir)/data.amorphous_withH
+	mpirun $(lammps) -in $<
+
+$(outdir)/add_water.inp: $(indir)/in.write_packmol $(indir)/in.common_variables
+	mpirun $(lammps) -in $<
+
+$(outdir)/xyz.water: $(outdir)/add_water.inp
+	packmol < $<
+
+$(outdir)/dump.water: $(outdir)/xyz.water $(indir)/xyz2dump.py $(outdir)/restart.SiO2
+	python $(indir)/xyz2dump.py $$(cat $(outdir)/num_atoms.dat) $< $@
+
+$(outdir)/restart.water: $(indir)/in.add_water $(outdir)/dump.water $(outdir)/restart.SiO2
+	mpirun $(lammps) -in $<
+
+$(outdir)/done: $(indir)/in.flow $(outdir)/restart.water
+	mpirun $(lammps) -in $<

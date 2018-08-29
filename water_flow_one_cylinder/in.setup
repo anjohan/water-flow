@@ -1,4 +1,6 @@
-include in.system
+include ${INDIR}/in.common_variables
+
+log ${OUTDIR}/log.setup
 
 variable dt equal ${dt_nowater}
 variable simulation_time equal 100
@@ -7,7 +9,6 @@ variable num_steps equal ${simulation_time}/${dt}
 variable num_dumps equal 100
 variable dumpfrequency equal ${num_steps}/${num_dumps}
 
-log data/log.setup
 #/atom 1 silicon
 #/atom 2 oxygen
 #/atom 3 hydrogen
@@ -16,21 +17,27 @@ log data/log.setup
 
 units metal
 boundary p p p
-atom_style molecular
+atom_style atomic
 
-read_data data/amorphous.data
+read_data ${OUTDIR}/data.amorphous_withH
 
-# pair_style  usc
-# pair_coeff  * * SiOH2O.vashishta Si O H
-# pair_modify coord 2 1 2.0 0.3
-# pair_modify coord 2 3 1.4 0.3
-pair_style vashishta
-pair_coeff	* * SiO2.vashishta Si O
+pair_style  usc
+pair_coeff  * * ${INDIR}/SiO2H2O.vashishta Si O H
+pair_modify coord 2 1 2.0 0.3
+pair_modify coord 2 3 1.4 0.3
+# pair_style vashishta
+# pair_coeff	* * SiO2.vashishta Si O
 mass            1 28.08
 mass            2 15.9994
-#mass            3 1.00794
+mass            3 1.00794
 
-include in.common_regions_groups
+include ${INDIR}/in.common_regions
+
+group movingslab region movingslab1
+group movingslab region movingslab2
+group rigidslab  region rigidslab
+group cylinder   region cylinder
+group slab union movingslab rigidslab
 
 group tobekept union slab cylinder
 group tobedeleted subtract all tobekept
@@ -39,10 +46,9 @@ delete_atoms group tobedeleted
 
 group moving subtract all rigidslab
 
-
 thermo 10
 thermo_style custom step time temp press pzz etotal cpuremain
-dump lagring all custom ${dumpfrequency} data/in.setup.bin id type x y z
+dump dump all custom ${dumpfrequency} ${OUTDIR}/in.setup.bin id type x y z
 
 group silicon type 1
 group oxygen type 2
@@ -52,7 +58,7 @@ variable num_oxygen equal count(oxygen)
 variable num_siliconx2 equal '2*count(silicon)'
 
 region tobefilled union 2 slab cylinder side out
-group preexisting region entire_system
+group preexisting union all
 
 if '$(v_num_oxygen % 2)' then &
     "create_atoms 2 random 1 142857 tobefilled"
@@ -80,5 +86,8 @@ group oxygen type 2
 timestep ${dt}
 run ${num_steps}
 
-write_restart data/unpassivated.restart
-write_data data/unpassivated.data
+reset_ids
+print "$(count(all))" file ${OUTDIR}/num_atoms.dat
+
+write_restart ${OUTDIR}/restart.SiO2
+write_data ${OUTDIR}/data.SiO2
