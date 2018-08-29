@@ -1,4 +1,4 @@
-include system.in
+include in.system
 variable start_temperature equal ${T}
 variable highest_temperature equal 4000
 variable dt equal ${dt_nowater}
@@ -42,7 +42,7 @@ timestep ${dt}
 
 thermo 100
 thermo_style custom step time temp press pzz etotal spcpu cpuremain
-dump lagring all custom ${dump_frequency} data/amorphous.in.bin id type x y z
+dump lagring all custom ${dump_frequency} data/in.amorphous.bin id type x y z
 
 velocity all create ${start_temperature} 277385 mom yes loop geom
 

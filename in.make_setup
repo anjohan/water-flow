@@ -1,4 +1,4 @@
-include system.in
+include in.system
 
 variable dt equal ${dt_nowater}
 variable simulation_time equal 100
@@ -30,7 +30,7 @@ mass            1 28.08
 mass            2 15.9994
 #mass            3 1.00794
 
-include common_regions_groups.in
+include in.common_regions_groups
 
 group tobekept union slab cylinder
 group tobedeleted subtract all tobekept
@@ -42,7 +42,7 @@ group moving subtract all rigidslab
 
 thermo 10
 thermo_style custom step time temp press pzz etotal cpuremain
-dump lagring all custom ${dumpfrequency} data/setup.in.bin id type x y z
+dump lagring all custom ${dumpfrequency} data/in.setup.bin id type x y z
 
 group silicon type 1
 group oxygen type 2

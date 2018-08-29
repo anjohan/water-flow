@@ -1,4 +1,4 @@
-include system.in
+include in.system
 log data/log.water
 
 variable dt equal ${dt_withwater}
@@ -31,7 +31,7 @@ mass            1 28.08
 mass            2 15.9994
 mass            3 1.00794
 
-include common_regions_groups.in
+include in.common_regions_groups
 group moving subtract all rigidslab
 
 group water subtract moving slab cylinder
@@ -61,8 +61,8 @@ compute watertemp water temp
 compute vacf water vacf
 thermo 100
 thermo_style custom step time temp c_watertemp v_vcmx_water ke pe etotal press pzz c_vacf[4] spcpu cpuremain
-dump dump all custom ${dumpperiod} data/water.in.bin id type x y z xu yu zu c_potperatom
-dump raredump all custom ${longdumpperiod} data/waterlowfrequency.in.bin id type x y z xu yu zu c_potperatom
+dump dump all custom ${dumpperiod} data/in.water.bin id type x y z xu yu zu c_potperatom
+dump raredump all custom ${longdumpperiod} data/in.waterlowfrequency.bin id type x y z xu yu zu c_potperatom
 
 restart 100000 data/water.*.restart
 
