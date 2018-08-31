@@ -1,9 +1,6 @@
+include ${INDIR}/in.common_variables
 log ${OUTDIR}/log.flow
 read_restart ${OUTDIR}/restart.water
-
-units metal
-boundary p p p
-atom_style atomic
 
 pair_style  usc
 pair_coeff  * * ${INDIR}/SiO2H2O.vashishta Si O H
@@ -22,7 +19,7 @@ thermo 100
 thermo_style custom step time temp press etotal v_vx_water spcpu cpuremain
 
 variable equilibration_time equal 20
-variable equilibration_steps equal ${equilibrium_time}/dt
+variable equilibration_steps equal ${equilibration_time}/dt
 
 dump equidump all custom 100 ${OUTDIR}/dump.equilibration.bin  id type x y z vx vy vz xu yu zu fx fy fz v_is_water
 

@@ -11,19 +11,19 @@ $(outdir)/data.amorphous: $(indir)/in.make_amorphous $(indir)/in.common_variable
 	mpirun $(lammps) -in $<
 
 $(outdir)/data.amorphous_withH: $(indir)/data_addH.py $(outdir)/data.amorphous
-	python $^ $@
+	python3 $^ $@
 
 $(outdir)/restart.SiO2: $(indir)/in.setup $(outdir)/data.amorphous_withH
 	mpirun $(lammps) -in $<
 
-$(outdir)/add_water.inp: $(indir)/in.write_packmol $(indir)/in.common_variables
+$(outdir)/add_water.inp: $(indir)/in.write_packmol $(indir)/in.common_variables $(outdir)/data.amorphous
 	mpirun $(lammps) -in $<
 
 $(outdir)/xyz.water: $(outdir)/add_water.inp
 	packmol < $<
 
 $(outdir)/dump.water: $(outdir)/xyz.water $(indir)/xyz2dump.py $(outdir)/restart.SiO2
-	python $(indir)/xyz2dump.py $$(cat $(outdir)/num_atoms.dat) $< $@
+	python3 $(indir)/xyz2dump.py $$(cat $(outdir)/num_atoms.dat) $< $@
 
 $(outdir)/restart.water: $(indir)/in.add_water $(outdir)/dump.water $(outdir)/restart.SiO2
 	mpirun $(lammps) -in $<
