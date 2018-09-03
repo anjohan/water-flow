@@ -1,7 +1,7 @@
 log ${OUTDIR}/log.system
 variable a equal 7.16
-variable Lx equal 9
-variable Ly equal 9
+variable Lx equal 27
+variable Ly equal 27
 variable x equal ${Lx}*$a
 variable y equal ${Ly}*$a
 variable z_bottom equal 0
