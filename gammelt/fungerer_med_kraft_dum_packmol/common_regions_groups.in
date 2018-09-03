@@ -1,0 +1,11 @@
+region entire_system block EDGE EDGE EDGE EDGE EDGE EDGE
+
+region movingslab1 block EDGE EDGE EDGE EDGE ${z_bottom} ${z_movingrigid}
+region rigidslab block EDGE EDGE EDGE EDGE ${z_movingrigid} ${z_rigidmoving}
+region movingslab2 block EDGE EDGE EDGE EDGE ${z_rigidmoving} ${z_topofslab}
+region slab union 3 rigidslab movingslab1 movingslab2
+region cylinder cylinder z ${xmid} ${xmid} ${cylinderradius} ${z_bottom} EDGE
+
+group slab region slab
+group rigidslab region rigidslab
+group cylinder region cylinder
