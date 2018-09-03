@@ -1,8 +1,8 @@
 #!/bin/sh
 # Number of tasks (MPI ranks):
-#SBATCH --time='23:00:00'
+#SBATCH --time='01:00:00'
 #SBATCH --account=nn9272k
-#SBATCH --nodes=16
+#SBATCH --nodes=4
 # #SBATCH --account=trocks
 # #SBATCH --nodes=5
 #SBATCH --ntasks-per-node=16
@@ -15,4 +15,4 @@ module load intelmpi.intel
 module load intel
 module load python3
 
-make
+make data/add_water.inp

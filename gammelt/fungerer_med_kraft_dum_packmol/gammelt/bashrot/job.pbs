@@ -1,0 +1,26 @@
+#!/bin/bash
+#PBS -q priya
+#PBS -l nodes=8:ppn=16:IB
+#PBS -l walltime=20:00:00
+#PBS -o pwp.out
+#PBS -j oe
+#PBS -N pe_opt
+#PBS -d .
+
+
+source /usr/usc/intel/default/setup.sh
+source /usr/usc/openmpi/1.8.8/setup.sh.intel
+
+
+echo "starting simulation **************************************"
+date
+np=$(cat $PBS_NODEFILE | wc -l)
+
+#mpirun -np 1 ~/.unlimited.sh ./qxmd_mpi > log.qxmd
+mpirun -np 128 /staging/pv/ankitmis/Anders/lammps/src/lmp_intel_cpu_openmpi -in amorf.in > log
+
+date
+echo "simulation finished **************************************"
+echo
+
+
