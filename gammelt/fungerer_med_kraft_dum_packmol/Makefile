@@ -1,7 +1,7 @@
 lammps = $(shell find ~ -name lmp_*mpi* 2> /dev/null)
 
 log.system: system.in
-	$(lammps) -in system.in
+	mpirun $(lammps) -in system.in
 
 data/amorphous.data: make_amorphous.in system.in
 	mkdir -p data
@@ -16,7 +16,7 @@ data/unpassivatedwithH.data: data/unpassivated.data fix_setup_addH.py
 	date
 	python fix_setup_addH.py
 	date
-data/passivated.xyz: data/unpassivated.data system.in common_regions_groups.in passivate.in
+data/passivated.xyz: data/unpassivatedwithH.data system.in common_regions_groups.in passivate.in
 	date
 	mpirun -np 1 $(lammps) -in passivate.in
 	date
