@@ -1,0 +1,20 @@
+a=7.16
+antx=30
+anty=30
+x=$(py "$antx*$a")
+y=$(py "$anty*$a")
+nederst=0
+hardbunntykkelse=$(py "2*$a")
+mykbunntykkelse=$(py "2*$a")
+xmid=$(py "$x/2")
+ymid=$(py "$y/2")
+midtenavbunn1=$(py "${nederst} + ${mykbunntykkelse}")
+midtenavbunn2=$(py "${midtenavbunn1} + ${hardbunntykkelse}")
+toppavbunn=$(py "${midtenavbunn2} + ${mykbunntykkelse}")
+sylinderhoyde=$(py "12*$a")
+sylinderradius=$(py "4*$a")
+toppavsylinder=$(py "${toppavbunn} + ${sylinderhoyde}")
+systemhoyde=$(py "${toppavsylinder}/$a")
+dt=0.0005
+
+T=300
