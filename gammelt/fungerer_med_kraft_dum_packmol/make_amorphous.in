@@ -27,7 +27,7 @@ log data/log.amorphous
 
 units metal
 boundary p p p
-atom_style molecular
+atom_style atomic
 
 read_data betacristobalite.data
 replicate ${Lx} ${Ly} ${systemheight}

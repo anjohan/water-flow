@@ -7,7 +7,7 @@ log data/log.passivate
 
 units metal
 boundary p p p
-atom_style	molecular
+atom_style	atomic
 
 read_data data/unpassivatedwithH.data
 
