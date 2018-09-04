@@ -61,9 +61,9 @@ compute watertemp water temp
 compute vacf water vacf
 thermo 100
 thermo_style custom step time temp c_watertemp v_vcmx_water ke pe etotal press pzz c_vacf[4] spcpu cpuremain
-dump dump all custom ${dumpperiod} data/water.in.bin id type x y z xu yu zu c_potperatom
-dump waterdump water custom ${dumpperiod} data/onlywater.in.bin id type x y z xu yu zu c_potperatom
-dump raredump all custom ${longdumpperiod} data/waterlowfrequency.in.bin id type x y z xu yu zu c_potperatom
+dump dump all custom ${dumpperiod} data/water.in.bin id type x y z vx vy vz fx fy fz xu yu zu c_potperatom
+dump waterdump water custom ${dumpperiod} data/onlywater.in.bin id type x y z vx vy vz fx fy fz xu yu zu c_potperatom
+dump raredump all custom ${longdumpperiod} data/waterlowfrequency.in.bin id type x y z vx vy vz fx fy fz xu yu zu c_potperatom
 
 restart 100000 data/water.*.restart
 
