@@ -29,7 +29,7 @@ units metal
 boundary p p p
 atom_style molecular
 
-read_data betacristobalite_noH.data
+read_data betacristobalite.data
 replicate ${Lx} ${Ly} ${systemheight}
 
 pair_style vashishta
