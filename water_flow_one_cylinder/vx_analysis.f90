@@ -59,8 +59,7 @@ program vx_analysis
 
             if (timestep < start_timestep) cycle chunkloop
 
-            do j = 1, atoms_in_chunk
-                ! write(*,*) "x = ", atom_data(x_idx, j)
+            atomloop: do j = 1, atoms_in_chunk
                 associate(x  => atom_data(x_idx, j), &
                           vx => atom_data(vx_idx, j))
                     bin_idx = int(x/bin_size) + 1
@@ -69,7 +68,7 @@ program vx_analysis
                     count_hist(bin_idx) = count_hist(bin_idx) + 1
                     vx_hist(bin_idx) = vx_hist(bin_idx) + vx
                 end associate
-            end do
+            end do atomloop
         end do chunkloop
     end do steploop
     where(count_hist > 0)
