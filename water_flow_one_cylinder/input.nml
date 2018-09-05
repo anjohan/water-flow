@@ -1,0 +1,5 @@
+&input
+    infile="dum_packmol/data/onlywater.in.bin",
+    start_timestep=400000,
+    outfile="test.dat"
+/

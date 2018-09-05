@@ -2,7 +2,7 @@ program vx_analysis
     use iso_c_binding, only: c_int, c_long_long, c_double
     use iso_fortran_env, only: iostat_end
     implicit none
-    character(len=:), allocatable :: filename
+    character(len=1024) :: infile, outfile
     integer(c_int) :: num_chunks, num_columns, values_in_chunk, atoms_in_chunk
     integer(c_long_long) :: num_atoms, timestep, start_timestep
 
@@ -17,16 +17,16 @@ program vx_analysis
     integer :: u, i, j, fstat = 0
     integer :: x_idx = 3, vx_idx = 6, bin_idx
 
-    filename = "./dum_packmol/data/onlywater.in.bin"
-    start_timestep = 400000
+    namelist /input/ infile, start_timestep, outfile
+    read(*,nml=input)
 
     allocate(vx_hist(num_bins), count_hist(num_bins), atom_data(1,1))
     vx_hist(:) = 0
     count_hist(:) = 0
 
-    open(newunit=u, file=filename, access="stream", action="read", iostat=fstat)
+    open(newunit=u, file=trim(infile), access="stream", action="read", iostat=fstat)
     if (fstat /= 0) then
-        error stop "Cannot open " // filename
+        error stop "Cannot open " // infile
     end if
 
     steploop: do
@@ -76,7 +76,7 @@ program vx_analysis
     end where
     close(u)
 
-    open(newunit=u, file="output.dat", status="replace")
+    open(newunit=u, file=trim(outfile), status="replace")
     do i = 1, num_bins
         write(u,*) (i-0.5d0)*bin_size, vx_hist(i)
     end do
