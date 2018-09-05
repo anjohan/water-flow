@@ -5,7 +5,7 @@ variable dt equal ${dt_withwater}
 variable total_time equal 500
 variable num_steps equal ${total_time}/${dt}
 
-variable dumpperiod equal 10000
+variable dumpperiod equal 1000
 variable longdumpperiod equal ${dumpperiod}*10
 variable dx equal ${x}/30
 variable Vperchunk equal ${dx}*${dx}*${dx}

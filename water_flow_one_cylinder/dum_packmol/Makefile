@@ -20,7 +20,7 @@ data/passivated.xyz: data/unpassivatedwithH.data system.in common_regions_groups
 	date
 	mpirun -np 1 $(lammps) -in passivate.in
 	date
-data/water.inp: packmol_template.inp water.py log.system
+data/water.inp: packmol_template.inp water.py data/unpassivatedwithH.data
 	date
 	python water.py
 	date
@@ -28,7 +28,7 @@ data/withwater.xyz: data/passivated.xyz data/water.inp water.xyz
 	date
 	packmol < data/water.inp
 	date
-data/withwater.data: data/withwater.xyz withwater_xyztodata.py log.system
+data/withwater.data: data/withwater.xyz withwater_xyztodata.py
 	date
 	python3 withwater_xyztodata.py
 	date
