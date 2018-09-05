@@ -1,3 +1,5 @@
+*.dat
+*.x
 *.pyc
 *.out
 __pycache__
