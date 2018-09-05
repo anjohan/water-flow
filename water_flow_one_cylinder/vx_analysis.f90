@@ -11,13 +11,13 @@ program vx_analysis
 
     real(c_double), allocatable :: atom_data(:,:), vx_hist(:)
     integer(c_int), allocatable :: count_hist(:)
-    integer(c_int) :: num_bins = 1000
-    real(c_double) :: bin_size = 0
+    integer(c_int) :: num_bins
+    real(c_double) :: bin_size = 0, y_fraction, Lx, Ly, ymin, ymax
 
     integer :: u, i, j, fstat = 0
     integer :: x_idx = 3, vx_idx = 6, bin_idx
 
-    namelist /input/ infile, start_timestep, outfile
+    namelist /input/ infile, start_timestep, outfile, y_fraction, num_bins
     read(*,nml=input)
 
     allocate(vx_hist(num_bins), count_hist(num_bins), atom_data(1,1))
@@ -41,7 +41,11 @@ program vx_analysis
         end if
 
         if (bin_size == 0) then
-            bin_size = (boundary(2,1) - boundary(1,1))/num_bins
+            Lx = boundary(2,1) - boundary(1,1)
+            Ly = boundary(2,2) - boundary(1,2)
+            bin_size = Lx/num_bins
+            ymin = (0.5-y_fraction/2)*Ly
+            ymax = (0.5+y_fraction/2)*Ly
         end if
 
         read(u) num_columns, num_chunks
@@ -61,7 +65,9 @@ program vx_analysis
 
             atomloop: do j = 1, atoms_in_chunk
                 associate(x  => atom_data(x_idx, j), &
+                          y  => atom_data(x_idx+1, j), &
                           vx => atom_data(vx_idx, j))
+                    if (y < ymin .or. y > ymax) cycle atomloop
                     bin_idx = int(x/bin_size) + 1
                     bin_idx = min(bin_idx, num_bins)
                     bin_idx = max(bin_idx, 1)
@@ -78,7 +84,7 @@ program vx_analysis
 
     open(newunit=u, file=trim(outfile), status="replace")
     do i = 1, num_bins
-        write(u,*) (i-0.5d0)*bin_size, vx_hist(i)
+        write(u,*) (i-0.5d0)*bin_size, vx_hist(i), abs((i-0.5d0)*bin_size-Lx/2)
     end do
     close(u)
 end program
