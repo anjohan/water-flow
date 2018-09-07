@@ -35,6 +35,8 @@ program vx_analysis
             exit steploop
         end if
 
+        write(*,*) "Reading timestep", timestep
+
         read(u) num_atoms, triclinic, boundary_conditions, boundary
         if (triclinic > 0) then
             read(u) angles
