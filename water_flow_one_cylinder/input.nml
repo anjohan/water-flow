@@ -3,5 +3,7 @@
     start_timestep=400000,
     outfile="test.dat",
     y_fraction=0.1,
-    num_bins=1000
+    num_bins=1000,
+    x_idx=1,
+    vx_idx=4
 /
