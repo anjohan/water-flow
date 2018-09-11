@@ -54,7 +54,7 @@ fix waterintegrator water nve
 fix thermostat movingsilicate nvt temp $T $T 1.0
 velocity moving create ${T} 277385 mom yes loop geom
 
-fix externalforce water addforce 0.00005 0 0
+fix externalforce water addforce 0.00001 0 0
 variable vcmx_water equal vcm(water,x)
 compute watertemp water temp
 
