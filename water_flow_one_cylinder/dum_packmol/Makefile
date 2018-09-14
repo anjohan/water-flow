@@ -32,7 +32,7 @@ data/withwater.data: data/withwater.xyz withwater_xyztodata.py
 	date
 	python3 withwater_xyztodata.py
 	date
-data/water.in.bin: data/withwater.data water.in system.in common_regions_groups.in
+data/water_%.bin: data/withwater.data water.in system.in common_regions_groups.in
 	date
-	mpirun $(lammps) -in water.in
+	mpirun $(lammps) -var FORCE $* -in water.in
 	date
