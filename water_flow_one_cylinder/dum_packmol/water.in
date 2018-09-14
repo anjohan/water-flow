@@ -39,14 +39,12 @@ variable Vperchunk equal ${dx_temppress}*${dx_temppress}*${dx_temppress}
 print ${Vperchunk} file "data/Vperchunk.dat"
 
 # ===== binning for vx ===== #
-variable num_bins_xy equal 500
-variable num_bins_z  equal 100
+variable num_bins_xy equal 400
+variable num_bins_z  equal 50
 variable dx equal lx/v_num_bins_xy
-variable dz equal v_cylinderheight/v_num_bins_xy
+variable dz equal v_cylinderheight/v_num_bins_z
 
-compute vx_binning water chunk/atom bin/3d x center ${dx} y center ${dx} z center ${dz} units box discard yes bound z ${z_topofslab} upper
-# FLYTT TIL ETTER FOERSTE RUN
-fix vx_per_chunk all ave/chunk 20 $(v_num_steps/(20*20)) $(v_num_steps/20) vx_binning vx file data/vx_${FORCE}.profile
+compute vx_binning water chunk/atom bin/3d x center ${dx} y center ${dx} z center ${dz} units box discard yes bound z ${z_topofslab} ${z_topofcylinder}
 # =====                ===== #
 
 timestep ${dt}
@@ -81,6 +79,7 @@ restart 100000 data/water_${FORCE}.*.restart
 run $(v_num_steps/2)
 
 #dump waterdump water custom $(v_dumpperiod/25) data/onlywater_${FORCE}.in.bin x y z vx vy vz
+fix vx_per_chunk all ave/chunk 20 $(v_num_steps/(20*20)) $(v_num_steps/20) vx_binning vx file data/vx_${FORCE}.profile
 
 run $(v_num_steps/2)
 
