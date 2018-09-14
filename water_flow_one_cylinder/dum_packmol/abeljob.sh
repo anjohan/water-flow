@@ -15,4 +15,4 @@ module load intelmpi.intel
 module load intel
 module load python3
 
-make data/water.in.bin
+make

@@ -1,16 +1,6 @@
 include system.in
 log data/log.water_${FORCE}
 
-variable dt equal ${dt_withwater}
-variable total_time equal 1000
-variable num_steps equal ${total_time}/${dt}
-
-variable dumpperiod equal 10000
-variable longdumpperiod equal ${dumpperiod}*10
-variable dx equal ${x}/30
-variable Vperchunk equal ${dx}*${dx}*${dx}
-print ${Vperchunk} file "data/Vperchunk.dat"
-
 #/atom 1 silicon
 #/atom 2 oxygen
 #/atom 3 hydrogen
@@ -32,23 +22,43 @@ mass            2 15.9994
 mass            3 1.00794
 
 include common_regions_groups.in
+
 group moving subtract all rigidslab
 
 group water subtract moving slab cylinder
 group movingsilicate subtract moving water
+
+variable dt equal ${dt_withwater}
+variable total_time equal 1000
+variable num_steps equal ${total_time}/${dt}
+
+variable dumpperiod equal 20000
+variable longdumpperiod equal ${dumpperiod}*10
+variable dx_temppress equal ${x}/30
+variable Vperchunk equal ${dx_temppress}*${dx_temppress}*${dx_temppress}
+print ${Vperchunk} file "data/Vperchunk.dat"
+
+# ===== binning for vx ===== #
+variable num_bins_xy equal 500
+variable num_bins_z  equal 100
+variable dx equal lx/v_num_bins_xy
+variable dz equal v_cylinderheight/v_num_bins_xy
+
+compute vx_binning water chunk/atom bin/3d x center ${dx} y center ${dx} z center ${dz} units box discard yes bound z ${z_topofslab} upper
+# =====                ===== #
 
 timestep ${dt}
 minimize 1e-6 1e-6 1000 1000
 write_data data/01_withwater_minimised.data
 
 compute potperatom all pe/atom
-compute binning all chunk/atom bin/3d x lower ${dx} y lower ${dx} z lower ${dx}
+compute binning_temppress all chunk/atom bin/3d x lower ${dx_temppress} y lower ${dx_temppress} z lower ${dx_temppress}
 
 compute stress_x_V_per_atom all stress/atom NULL ke pair
 # variable pressure_per_chunk atom '-(c_stress_x_V_per_atom[1]+c_stress_x_V_per_atom[2]+c_stress_x_V_per_atom[3])/(3*(${Vperchunk}))'
 
-fix temp_per_chunk all ave/chunk 100 100 10000 binning temp file data/temp_per_chunk_${FORCE}.profile
-fix pressure_per_chunk all ave/chunk 100 100 10000 binning c_stress_x_V_per_atom[1] c_stress_x_V_per_atom[2] c_stress_x_V_per_atom[3] norm sample file data/stress_x_V_per_chunk_${FORCE}.profile
+fix temp_per_chunk all ave/chunk 100 100 10000 binning_temppress temp file data/temp_per_chunk_${FORCE}.profile
+fix pressure_per_chunk all ave/chunk 100 100 10000 binning_temppress c_stress_x_V_per_atom[1] c_stress_x_V_per_atom[2] c_stress_x_V_per_atom[3] norm sample file data/stress_x_V_per_chunk_${FORCE}.profile
 
 fix waterintegrator water nve
 fix thermostat movingsilicate nvt temp $T $T 1.0
@@ -68,7 +78,8 @@ dump raredump all custom ${longdumpperiod} data/waterlowfrequency_${FORCE}.bin i
 restart 100000 data/water_${FORCE}.*.restart
 run $(v_num_steps/2)
 
-dump waterdump water custom $(v_dumpperiod/25) data/onlywater_${FORCE}.in.bin x y z vx vy vz
+#dump waterdump water custom $(v_dumpperiod/25) data/onlywater_${FORCE}.in.bin x y z vx vy vz
+fix vx_per_chunk all ave/chunk 20 $(v_num_steps/(20*20)) $(v_num_steps/20) vx_binning vx file data/vx_${FORCE}.profile
 
 run $(v_num_steps/2)
 
