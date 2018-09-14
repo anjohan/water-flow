@@ -2,10 +2,10 @@ include system.in
 log data/log.water_${FORCE}
 
 variable dt equal ${dt_withwater}
-variable total_time equal 500
+variable total_time equal 1000
 variable num_steps equal ${total_time}/${dt}
 
-variable dumpperiod equal 1000
+variable dumpperiod equal 10000
 variable longdumpperiod equal ${dumpperiod}*10
 variable dx equal ${x}/30
 variable Vperchunk equal ${dx}*${dx}*${dx}
@@ -62,11 +62,14 @@ compute vacf water vacf
 thermo 100
 thermo_style custom step time temp c_watertemp v_vcmx_water ke pe etotal press pzz c_vacf[4] spcpu cpuremain
 dump dump all custom ${dumpperiod} data/water_${FORCE}.bin id type x y z vx vy vz fx fy fz xu yu zu c_potperatom
-dump waterdump water custom ${dumpperiod} data/onlywater_${FORCE}.bin id type x y z vx vy vz fx fy fz xu yu zu c_potperatom
 dump raredump all custom ${longdumpperiod} data/waterlowfrequency_${FORCE}.bin id type x y z vx vy vz fx fy fz xu yu zu c_potperatom
 
-restart 100000 data/water_${FORCE}.*.restart
 
-run ${num_steps}
+restart 100000 data/water_${FORCE}.*.restart
+run $(v_num_steps/2)
+
+dump waterdump water custom $(v_dumpperiod/25) data/onlywater_${FORCE}.in.bin x y z vx vy vz
+
+run $(v_num_steps/2)
 
 write_data data/withwater_${total_time}ps.data

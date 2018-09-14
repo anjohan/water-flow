@@ -1,8 +1,8 @@
 #!/bin/sh
 # Number of tasks (MPI ranks):
-#SBATCH --time='15:00:00'
+#SBATCH --time='23:00:00'
 #SBATCH --account=nn9272k
-#SBATCH --nodes=16
+#SBATCH --nodes=32
 # #SBATCH --account=trocks
 # #SBATCH --nodes=5
 #SBATCH --ntasks-per-node=16
