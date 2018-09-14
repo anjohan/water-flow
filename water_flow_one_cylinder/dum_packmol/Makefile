@@ -1,6 +1,6 @@
 lammps = $(shell find ~ -name lmp_*mpi* 2> /dev/null)
 
-all: data/water_0.00001.bin
+all: data/water_0.0001.bin
 # all: $(foreach force,$(shell seq 0.00001 0.00001 0.0001), data/water_$(force).bin)
 
 log.system: system.in
