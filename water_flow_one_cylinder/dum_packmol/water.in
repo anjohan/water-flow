@@ -1,5 +1,5 @@
 include system.in
-log data/log.water
+log data/log.water_${FORCE}
 
 variable dt equal ${dt_withwater}
 variable total_time equal 500
@@ -47,28 +47,26 @@ compute binning all chunk/atom bin/3d x lower ${dx} y lower ${dx} z lower ${dx}
 compute stress_x_V_per_atom all stress/atom NULL ke pair
 # variable pressure_per_chunk atom '-(c_stress_x_V_per_atom[1]+c_stress_x_V_per_atom[2]+c_stress_x_V_per_atom[3])/(3*(${Vperchunk}))'
 
-fix temp_per_chunk all ave/chunk 100 100 10000 binning temp file data/temp_per_chunk.profile
-fix pressure_per_chunk all ave/chunk 100 100 10000 binning c_stress_x_V_per_atom[1] c_stress_x_V_per_atom[2] c_stress_x_V_per_atom[3] norm sample file data/stress_x_V_per_chunk.profile
+fix temp_per_chunk all ave/chunk 100 100 10000 binning temp file data/temp_per_chunk_${FORCE}.profile
+fix pressure_per_chunk all ave/chunk 100 100 10000 binning c_stress_x_V_per_atom[1] c_stress_x_V_per_atom[2] c_stress_x_V_per_atom[3] norm sample file data/stress_x_V_per_chunk_${FORCE}.profile
 
 fix waterintegrator water nve
 fix thermostat movingsilicate nvt temp $T $T 1.0
 velocity moving create ${T} 277385 mom yes loop geom
 
-fix externalforce water addforce 0.0001 0 0
+fix externalforce water addforce ${FORCE} 0 0
 variable vcmx_water equal vcm(water,x)
 compute watertemp water temp
 
 compute vacf water vacf
 thermo 100
 thermo_style custom step time temp c_watertemp v_vcmx_water ke pe etotal press pzz c_vacf[4] spcpu cpuremain
-dump dump all custom ${dumpperiod} data/water.in.bin id type x y z vx vy vz fx fy fz xu yu zu c_potperatom
-dump waterdump water custom ${dumpperiod} data/onlywater.in.bin id type x y z vx vy vz fx fy fz xu yu zu c_potperatom
-dump raredump all custom ${longdumpperiod} data/waterlowfrequency.in.bin id type x y z vx vy vz fx fy fz xu yu zu c_potperatom
+dump dump all custom ${dumpperiod} data/water_${FORCE}.bin id type x y z vx vy vz fx fy fz xu yu zu c_potperatom
+dump waterdump water custom ${dumpperiod} data/onlywater_${FORCE}.bin id type x y z vx vy vz fx fy fz xu yu zu c_potperatom
+dump raredump all custom ${longdumpperiod} data/waterlowfrequency_${FORCE}.bin id type x y z vx vy vz fx fy fz xu yu zu c_potperatom
 
-restart 100000 data/water.*.restart
-
+restart 100000 data/water_${FORCE}.*.restart
 
 run ${num_steps}
 
 write_data data/withwater_${total_time}ps.data
-
