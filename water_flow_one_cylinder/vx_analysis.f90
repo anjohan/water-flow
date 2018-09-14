@@ -26,7 +26,8 @@ program vx_analysis
 
     open(newunit=u, file=trim(infile), access="stream", action="read", iostat=fstat)
     if (fstat /= 0) then
-        error stop "Cannot open " // infile
+        write(*,*) "Cannot open " // infile
+        error stop
     end if
 
     steploop: do
