@@ -1,0 +1,21 @@
+vx_filename = "output_vx_vs_x.dat"
+vx_wrapped_filename = "output_vx_vs_x_wrapped.dat"
+
+set grid
+set ylabel "vx [Å/ps]"
+set key autotitle columnhead
+
+set xlabel "x [Å]"
+
+stats vx_filename skip 1 nooutput
+
+set yrange[-5:50]
+
+plot for[i=2:STATS_columns] vx_filename u 1:i w l lw 2
+pause -1
+
+stats vx_wrapped_filename skip 1 nooutput
+
+set xlabel "|x-Lx/2| [Å]"
+plot for[i=2:STATS_columns] vx_wrapped_filename u 1:i w l lw 2
+pause -1
