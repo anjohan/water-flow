@@ -21,9 +21,13 @@ set xlabel "|x-Lx/2| [Å]"
 plot for[i=2:STATS_columns] vx_wrapped_filename u 1:i w l lw 2
 pause -1
 
+f(x) = a*x+b
+fit f(x) vx_asymm_filename via a, b
+
 set xlabel "F [eV/Å]"
 set ylabel "||vx(front) - vx(rear)||/||vx(rear)||"
 unset yrange
 set key bottom right
-plot vx_asymm_filename title "||vx(front) - vx(rear)||/||vx(rear)||" w l lw 2
+plot vx_asymm_filename title "||vx(front) - vx(rear)||/||vx(rear)||" w l lw 2, \
+    a*x+b title "linear regression" w l lw 2
 pause -1
