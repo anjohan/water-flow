@@ -22,6 +22,7 @@ plot for[i=2:STATS_columns] vx_wrapped_filename u 1:i w l lw 2
 pause -1
 
 set xlabel "F [eV/Å]"
-set ylabel "||vx_front - vx_rear||/||vx_rear||"
-plot vx_asymm_filename w l lw 2
+set ylabel "||vx(front) - vx(rear)||/||vx(rear)||"
+unset yrange
+plot vx_asymm_filename title "||vx(front) - vx(rear)||/||vx(rear)||" w l lw 2
 pause -1
