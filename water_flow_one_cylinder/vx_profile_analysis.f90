@@ -79,7 +79,7 @@ program vx_profile_analysis
         end do timesteps
         close(u)
     end do forces
-    !omp end parallel do
+    !$omp end parallel do
 
     where (count_hists > 0) vx_hists(:,:) = vx_hists(:,:)/count_hists(:,:)
 
@@ -98,8 +98,8 @@ program vx_profile_analysis
     write(u, fmt=fmtstring) ([Fs(i),Fs(i)] , i = 1, numFs)
     do i = 0,num_bins/2-1
         write(u, fmt="(*(f0.6,:,x))") abs(x(num_bins/2+i)-Lx/2), &
-                                      ([vx_hists(num_bins/2+i+1,j), &
-                                        vx_hists(num_bins/2-i,j)], j = 1, numFs)
+                                      (vx_hists(num_bins/2+i+1,j), &
+                                       vx_hists(num_bins/2-i,j), j = 1, numFs)
     end do
     close(u)
 end program
