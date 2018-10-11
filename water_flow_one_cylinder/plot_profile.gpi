@@ -24,5 +24,6 @@ pause -1
 set xlabel "F [eV/Å]"
 set ylabel "||vx(front) - vx(rear)||/||vx(rear)||"
 unset yrange
+set key bottom right
 plot vx_asymm_filename title "||vx(front) - vx(rear)||/||vx(rear)||" w l lw 2
 pause -1
