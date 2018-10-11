@@ -9,13 +9,14 @@ program vx_profile_analysis
 
     integer :: timestep, num_chunks, num_atoms, fstat, bin_id, num_columns = 6
     integer :: x_idx = 2, y_idx = 3, count_idx = 5, vx_idx = 6
-    real(real64) :: F, ymin, ymax, bin_size
-    real(real64), allocatable :: vx_hists(:,:), values(:,:), count_hists(:,:), x(:), Fs(:)
+    real(real64) :: F, ymin, ymax, bin_size, asymm, radius
+    real(real64), allocatable :: vx_hists(:,:), values(:,:), count_hists(:,:), x(:), Fs(:), &
+                                 vx_front(:,:), vx_rear(:,:)
 
     real(real64) :: y_fraction, Lx, Ly, Fmin, Fstep
-    integer :: num_bins, numFs, start_timestep
+    integer :: num_bins, numFs, start_timestep, start_bin_asymm
 
-    namelist /input/ inbase, start_timestep, outbase, y_fraction, num_bins, &
+    namelist /input/ inbase, start_timestep, outbase, y_fraction, radius, num_bins, &
                      Lx, Ly, Fmin, Fstep, numFs, Ffmt
 
     read(*, nml=input)
@@ -83,6 +84,8 @@ program vx_profile_analysis
 
     where (count_hists > 0) vx_hists(:,:) = vx_hists(:,:)/count_hists(:,:)
 
+    vx_front = vx_hists(num_bins/2:1:-1, :)
+    vx_rear  = vx_hists(num_bins/2+1:, :)
 
     open(newunit=u, file=trim(outbase)//"_vx_vs_x.dat", status="replace")
     fmtstring = "('x ',*('F='," // Ffmt // ",'eV/Å',:,x))"
@@ -98,8 +101,19 @@ program vx_profile_analysis
     write(u, fmt=fmtstring) ([Fs(i),Fs(i)] , i = 1, numFs)
     do i = 0,num_bins/2-1
         write(u, fmt="(*(f0.6,:,x))") abs(x(num_bins/2+i)-Lx/2), &
-                                      (vx_hists(num_bins/2+i+1,j), &
-                                       vx_hists(num_bins/2-i,j), j = 1, numFs)
+                                      (vx_rear(i+1,j), &
+                                       vx_front(i+1,j), j = 1, numFs)
     end do
     close(u)
+
+    start_bin_asymm = ceiling(radius/bin_size)
+
+    open(newunit=u, file=trim(outbase) // "_asymmetry.dat", status="replace")
+    write(u, *) "F[eV/Å] relative_2norm_diff"
+    do i = 1, numFs
+        asymm = norm2(vx_front(start_bin_asymm:,i)-vx_rear(start_bin_asymm:,i))/norm2(vx_rear(start_bin_asymm:,i))
+        write(u, *) Fs(i), asymm
+    end do
+    close(u)
+
 end program

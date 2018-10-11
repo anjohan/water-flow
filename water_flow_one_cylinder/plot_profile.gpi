@@ -1,5 +1,6 @@
 vx_filename = "output_vx_vs_x.dat"
 vx_wrapped_filename = "output_vx_vs_x_wrapped.dat"
+vx_asymm_filename = "output_asymmetry.dat"
 
 set grid
 set ylabel "vx [Å/ps]"
@@ -18,4 +19,9 @@ stats vx_wrapped_filename skip 1 nooutput
 
 set xlabel "|x-Lx/2| [Å]"
 plot for[i=2:STATS_columns] vx_wrapped_filename u 1:i w l lw 2
+pause -1
+
+set xlabel "F [eV/Å]"
+set ylabel "||vx_front - vx_rear||/||vx_rear||"
+plot vx_asymm_filename w l lw 2
 pause -1

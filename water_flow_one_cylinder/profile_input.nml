@@ -3,6 +3,7 @@
     start_timestep=400000,
     outbase="output",
     y_fraction=0.1,
+    radius=28.64,
     num_bins=200,
     Lx=214.8,
     Ly=214.8,
