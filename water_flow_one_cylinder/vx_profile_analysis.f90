@@ -9,7 +9,7 @@ program vx_profile_analysis
 
     integer :: timestep, num_chunks, num_atoms, fstat, bin_id, num_columns = 6
     integer :: x_idx = 2, y_idx = 3, count_idx = 5, vx_idx = 6
-    real(real64) :: F, ymin, ymax, bin_size, asymm, radius
+    real(real64) :: F, ymin, ymax, bin_size, radius
     real(real64), allocatable :: vx_hists(:,:), values(:,:), count_hists(:,:), x(:), Fs(:), &
                                  vx_front(:,:), vx_rear(:,:)
 
@@ -109,10 +109,15 @@ program vx_profile_analysis
     start_bin_asymm = ceiling(radius/bin_size)
 
     open(newunit=u, file=trim(outbase) // "_asymmetry.dat", status="replace")
-    write(u, *) "F[eV/Å] relative_2norm_diff"
+    write(u, *) "F[eV/Å] <vx>[Å/ps] relative_2norm_diff relative_integral_diff"
     do i = 1, numFs
-        asymm = norm2(vx_front(start_bin_asymm:,i)-vx_rear(start_bin_asymm:,i))/norm2(vx_rear(start_bin_asymm:,i))
-        write(u, *) Fs(i), asymm
+        associate(front => vx_front(start_bin_asymm:,i), &
+                  rear => vx_rear(start_bin_asymm:,i))
+            write(u, *) Fs(i), &
+                        sum(front + rear) / (size(front) + size(rear)), &
+                        norm2(front - rear) / norm2(rear), &
+                        sum(front - rear) / sum(rear)
+        end associate
     end do
     close(u)
 
