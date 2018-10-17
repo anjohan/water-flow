@@ -32,7 +32,7 @@ unset yrange
 set key bottom right
 plot vx_asymm_filename u 1:3 title "||vx(front) - vx(rear)||/||vx(rear)||" w l lw 2, \
     a*x+b title sprintf("%.2g * F + %.2g", a, b) w l lw 2
-!pause -1
+#pause -1
 
 
 set logscale xy
@@ -46,7 +46,7 @@ unset yrange
 set key bottom right
 plot vx_asymm_filename u 2:3 title "||vx(front) - vx(rear)||/||vx(rear)||" w l lw 2, \
     exp(b)*x**a title sprintf("<vx> ** %.2g", a) w l lw 2
-!pause -1
+#pause -1
 
 f(x) = a*x+b
 fit f(x) vx_asymm_filename u (log($1)):(log($4)) via a, b
@@ -57,7 +57,7 @@ unset yrange
 set key bottom right
 plot vx_asymm_filename u 1:4 title "int(vx(front) - vx(rear))/int(vx(rear))" w l lw 2, \
     exp(b)*x**a title sprintf("F ** %.2g", a) w l lw 2
-!pause -1
+#pause -1
 
 f(x) = a*x+b
 fit f(x) vx_asymm_filename u (log($2)):(log($4)) via a, b
@@ -67,6 +67,6 @@ unset yrange
 set key bottom right
 plot vx_asymm_filename u 2:4 title "int(vx(front) - vx(rear))/int(vx(rear))" w l lw 2, \
     exp(b)*x**a title sprintf("<vx> ** %.2g", a) w l lw 2
-!pause -1
+#pause -1
 unset multiplot
 pause -1
