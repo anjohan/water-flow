@@ -49,8 +49,8 @@ compute binning_temppress all chunk/atom bin/3d x lower ${dx_temppress} y lower 
 compute stress_x_V_per_atom all stress/atom NULL ke pair
 # variable pressure_per_chunk atom '-(c_stress_x_V_per_atom[1]+c_stress_x_V_per_atom[2]+c_stress_x_V_per_atom[3])/(3*(${Vperchunk}))'
 
-fix temp_per_chunk all ave/chunk 100 100 10000 binning_temppress temp file data/temp_per_chunk_${FORCE}.profile
-fix pressure_per_chunk all ave/chunk 100 100 10000 binning_temppress c_stress_x_V_per_atom[1] c_stress_x_V_per_atom[2] c_stress_x_V_per_atom[3] norm sample file data/stress_x_V_per_chunk_${FORCE}.profile
+fix temp_per_chunk all ave/chunk 200 500 100000 binning_temppress temp file data/temp_per_chunk_${FORCE}.profile
+fix pressure_per_chunk all ave/chunk 200 500 100000 binning_temppress c_stress_x_V_per_atom[1] c_stress_x_V_per_atom[2] c_stress_x_V_per_atom[3] norm sample file data/stress_x_V_per_chunk_${FORCE}.profile
 
 fix waterintegrator water nve
 fix thermostat movingsilicate nvt temp $T $T 1.0
@@ -66,22 +66,23 @@ thermo_style custom step time temp c_watertemp v_vcmx_water ke pe etotal press p
 dump dump all custom ${dumpperiod} data/water_${FORCE}.bin id type x y z vx vy vz fx fy fz xu yu zu c_potperatom
 dump raredump all custom ${longdumpperiod} data/waterlowfrequency_${FORCE}.bin id type x y z vx vy vz fx fy fz xu yu zu c_potperatom
 
+# ===== binning for vx ===== #
+variable num_bins_xy equal 400
+variable num_bins_z  equal 50
+fix velave water velocityaverage data/v_${FORCE}.bin 20 100000 ${num_bins_xy} ${num_bins_xy} ${num_bins_z} 0 $(lx) 0 $(ly) ${z_topofslab} ${z_topofcylinder}
 
 restart 100000 data/water_${FORCE}.*.restart
 run $(v_num_steps/2) upto
 
-# ===== binning for vx ===== #
-variable num_bins_xy equal 400
-variable num_bins_z  equal 50
-variable dx equal lx/v_num_bins_xy
-variable dz equal v_cylinderheight/v_num_bins_z
+uncompute vacf
+compute vacf water vacf
 
-compute vx_binning water chunk/atom bin/3d x center ${dx} y center ${dx} z center ${dz} units box discard yes bound z ${z_topofslab} ${z_topofcylinder}
+#compute vx_binning water chunk/atom bin/3d x center ${dx} y center ${dx} z center ${dz} units box discard yes bound z ${z_topofslab} ${z_topofcylinder}
 # =====                ===== #
 #
 #dump waterdump water custom $(v_dumpperiod/25) data/onlywater_${FORCE}.in.bin x y z vx vy vz
-fix vx_per_chunk all ave/chunk 20 $(v_num_steps/(20*20)) $(v_num_steps/20) vx_binning vx file data/vx_${FORCE}.profile
+#fix vx_per_chunk all ave/chunk 20 $(v_num_steps/(20*20)) $(v_num_steps/20) vx_binning vx file data/vx_${FORCE}.profile
 
 run $(v_num_steps/2)
 
-write_data data/withwater_${total_time}ps.data
+write_data data/withwater_${total_time}ps_${FORCE}.data
