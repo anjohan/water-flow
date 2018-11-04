@@ -10,8 +10,7 @@ set xlabel "x [Å]"
 
 stats vx_filename skip 1 nooutput
 
-set yrange[-5:50]
-
+#set multiplot layout 2, 1 title "Velocity vs position"
 plot for[i=2:STATS_columns] vx_filename u 1:i w l lw 2
 pause -1
 
@@ -19,9 +18,15 @@ stats vx_wrapped_filename skip 1 nooutput
 
 set xlabel "|x-Lx/2| [Å]"
 plot for[i=2:STATS_columns] vx_wrapped_filename u 1:i w l lw 2
+#unset multiplot
 pause -1
 
-set multiplot layout 4, 1 title "Various measures of asymmetry"
+set xlabel "F [eV/Å]"
+set ylabel "<vx> [Å/ps]"
+plot vx_asymm_filename u 1:2 notitle w l lw 2
+pause -1
+
+set multiplot layout 2, 2 title "Various measures of asymmetry"
 
 f(x) = a*x+b
 fit f(x) vx_asymm_filename u 1:3 via a, b

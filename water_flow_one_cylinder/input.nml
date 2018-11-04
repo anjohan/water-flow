@@ -1,9 +1,12 @@
 &input
-    infile="dum_packmol/data/onlywater.in.bin",
-    start_timestep=400000,
-    outfile="test.dat",
+    inbase="dum_packmol/data/v_",
+    start_timestep=1000000,
+    outbase="output",
     y_fraction=0.1,
-    num_bins=100,
-    x_idx=1,
-    vx_idx=4
+    radius=28.64,
+    Fmin=0.00001,
+    Fstep=0.00001,
+    numFs=10,
+    ave_x=2,
+    Ffmt="('0',f0.5)"
 /

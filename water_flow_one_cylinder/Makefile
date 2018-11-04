@@ -1,9 +1,13 @@
-FC = gfortran
-FFLAGS = -Wall -O3 -fopenmp
+FC = caf
+FFLAGS = -Wall -O0 -g -fcheck=all
+#FFLAGS = -Wall -O3 -g
 
-all: vx_analysis vx_profile_analysis
+progs = $(basename $(wildcard *.f90))
 
-%: %.o Makefile
+all: $(progs)
+
+%: %.f90 Makefile
 	$(FC) $(FFLAGS) -o $@ $<
-%.o: %.f90 Makefile
-	$(FC) $(FFLAGS) -c $<
+
+clean:
+	rm -rf *.dat $(progs)
