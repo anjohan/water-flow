@@ -116,14 +116,13 @@ program vx_profile_analysis
         allocate(vx_ave_z(Ny,Nx,numFs), &
                  vx_ave_yz(Nx, numFs))
 
-        counts_ave_z = sum(counts(:,:,:,:), dim=1)/Nz
+        counts_ave_z = sum(counts(:,:,:,:), dim=1)
 
         where (counts_ave_z /= 0)
             vx_ave_z = sum(v(1,:,:,:,:)*counts(:,:,:,:), dim=1)/counts_ave_z
         else where
             vx_ave_z = 0
         end where
-
 
         do l = 1, numFs
             do i = 1, Nx
