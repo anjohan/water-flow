@@ -138,12 +138,12 @@ program vx_profile_analysis
             end do
         end do
 
-        vx_front = vx_ave_yz(Nx/2-start_bin_asymm:1:-1, :)
-        vx_rear = vx_ave_yz(Nx/2+1+start_bin_asymm:, :)
+        vx_front = vx_ave_yz(Nx/2-start_bin_asymm:2:-1, :)
+        vx_rear = vx_ave_yz(Nx/2+1+start_bin_asymm:Nx-1, :)
         open(newunit=u, file=trim(outbase)//"_vx_vs_x.dat", status="replace")
         fmtstring = "('x ',*('F='," // Ffmt // ",'eV/Å',:,x))"
         write(u, fmt=fmtstring) Fs
-        do i = 1, Nx
+        do i = 2, Nx-2
             write(u, fmt="(*(f0.6,:,x))") (i-1)*dx, (vx_ave_yz(i,j), j = 1, numFs)
         end do
         close(u)
