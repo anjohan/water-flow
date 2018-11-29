@@ -2,6 +2,7 @@
 *.svg
 tags
 vx*analysis
+equilibration
 *.dat
 *.x
 *.pyc
