@@ -1,8 +1,0 @@
-#set terminal dumb
-infile = "output_corr_final.dat"
-
-stats infile nooutput
-
-set key autotitle columnhead
-plot for[i=2:STATS_columns] infile u 1:i w l lw 2
-pause -1
