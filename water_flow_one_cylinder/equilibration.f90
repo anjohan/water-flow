@@ -11,9 +11,9 @@ program vx_profile_analysis
     integer(int64), allocatable :: steps(:)
     integer :: Nx, Ny, Nz, fstat
     real(real64) :: F, ymin, ymax, zmin, zmax, xmin, xmax,  radius, &
-                    final_v_sum2
+                    final_v_sum2, final_v_sum
     real(real64), allocatable :: values(:,:,:,:), Fs(:), &
-                                 final_v(:,:,:,:), correlations(:,:)
+                                 final_v(:,:,:,:), correlations(:,:), rel_diffs(:,:)
 
     real(real64) :: y_fraction, Lx, Ly, Fmin, Fstep
     integer :: numFs, start_timestep, ave_x, num_steps
@@ -67,11 +67,13 @@ program vx_profile_analysis
         end do timesteps
 
         final_v = values(2:4,:,:,:)
+        final_v_sum = sum(final_v)
         final_v_sum2 = sum(final_v**2)
 
         if (.not. allocated(correlations)) then
             allocate(correlations(num_steps, numFs))
             correlations(:,:) = 0
+            allocate(rel_diffs, source=correlations)
         end if
 
         if (.not. allocated(steps)) allocate(steps(num_steps))
@@ -89,6 +91,7 @@ program vx_profile_analysis
                                              steps(i), "from " // filename
 
             correlations(i,l) = sum(final_v(:,:,:,:)*values(2:4,:,:,:))/final_v_sum2
+            rel_diffs(i,l) = sum(final_v - values(2:4,:,:,:))/final_v_sum
             if (this_image() == 1) write(*,*) correlations(i,l)
         end do
 
@@ -96,6 +99,7 @@ program vx_profile_analysis
 
     end do forces
     call co_sum(correlations)
+    call co_sum(rel_diffs)
 
     deallocate(values)
 
@@ -106,6 +110,15 @@ program vx_profile_analysis
 
         do i = 1, num_steps
             write(u, *) steps(i), correlations(i,:)
+        end do
+
+        close(u)
+
+        open(newunit=u, file=trim(outbase)//"_rel_diff.dat", status="replace")
+        write(u, fmt=fmtstring) Fs
+
+        do i = 1, num_steps
+            write(u, *) steps(i), rel_diffs(i,:)
         end do
 
         close(u)
