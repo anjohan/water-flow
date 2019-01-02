@@ -92,7 +92,6 @@ program vx_profile_analysis
 
             correlations(i,l) = sum(final_v(:,:,:,:)*values(2:4,:,:,:))/final_v_sum2
             rel_diffs(i,l) = sum(final_v - values(2:4,:,:,:))/final_v_sum
-            if (this_image() == 1) write(*,*) correlations(i,l)
         end do
 
         close(u)
