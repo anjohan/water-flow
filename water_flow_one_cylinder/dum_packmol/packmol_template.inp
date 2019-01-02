@@ -13,6 +13,6 @@ end structure
 
 structure water.xyz
     number NUMBEROFMOLECULES
-    outside cylinder MIDx MIDy WATERBOTTOM 0 0 1 RADIUS HEIGHT
+#    outside cylinder MIDx MIDy WATERBOTTOM 0 0 1 RADIUS HEIGHT
     inside box 0 0 WATERBOTTOM X Y WATERTOP
 end structure

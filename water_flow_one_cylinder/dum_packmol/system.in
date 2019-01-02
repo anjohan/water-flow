@@ -1,6 +1,6 @@
 log log.system
 variable a equal 7.16
-variable Lx equal 30
+variable Lx equal 60
 variable Ly equal 30
 variable x equal ${Lx}*$a
 variable y equal ${Ly}*$a
