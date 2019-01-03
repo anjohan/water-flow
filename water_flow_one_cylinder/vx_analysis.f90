@@ -140,7 +140,7 @@ program vx_profile_analysis
 
         vx_front = vx_ave_yz(Nx/2-start_bin_asymm:2:-1, :)
         vx_rear = vx_ave_yz(Nx/2+1+start_bin_asymm:Nx-1, :)
-        open(newunit=u, file=trim(outbase)//"_vx_vs_x.dat", status="replace")
+        open(newunit=u, file=trim(outbase)//"vx_vs_x.dat", status="replace")
         fmtstring = "('x ',*('F='," // Ffmt // ",'eV/Å',:,x))"
         write(u, fmt=fmtstring) Fs
         do i = 2, Nx-2
@@ -152,7 +152,7 @@ program vx_profile_analysis
         end do
         close(u)
 
-        open(newunit=u, file=trim(outbase)//"_vx_vs_x_wrapped.dat", status="replace")
+        open(newunit=u, file=trim(outbase)//"vx_vs_x_wrapped.dat", status="replace")
         fmtstring = "('x ',*('F='," // Ffmt // ",'eV/Å,infront',x,'F='," &
             // Ffmt // ",'eV/Å,behind',:,x))"
         write(u, fmt=fmtstring) ([Fs(i),Fs(i)] , i = 1, numFs)
@@ -163,7 +163,7 @@ program vx_profile_analysis
         end do
         close(u)
 
-        open(newunit=u, file=trim(outbase) // "_asymmetry.dat", status="replace")
+        open(newunit=u, file=trim(outbase) // "asymmetry.dat", status="replace")
         write(u, *) "F[eV/Å] <vx>[Å/ps] relative_2norm_diff relative_integral_diff"
         do i = 1, numFs
             write(u, *) Fs(i), &
