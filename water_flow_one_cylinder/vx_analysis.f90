@@ -144,7 +144,11 @@ program vx_profile_analysis
         fmtstring = "('x ',*('F='," // Ffmt // ",'eV/Å',:,x))"
         write(u, fmt=fmtstring) Fs
         do i = 2, Nx-2
-            write(u, fmt="(*(f0.6,:,x))") (i-1)*dx, (vx_ave_yz(i,j), j = 1, numFs)
+            if (i < Nx/2-start_bin_asymm .or. i > Nx/2+start_bin_asymm) then
+                write(u, fmt="(*(f0.6,:,x))") (i-1)*dx, (vx_ave_yz(i,j), j = 1, numFs)
+            else
+                write(u, fmt="(*(f0.6,:,x))") (i-1)*dx, (0.0d0, j = 1, numFs)
+            end if
         end do
         close(u)
 
