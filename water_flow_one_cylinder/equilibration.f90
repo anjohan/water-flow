@@ -104,7 +104,7 @@ program vx_profile_analysis
     deallocate(values)
 
     if (this_image() == 1) then
-        open(newunit=u, file=trim(outbase)//"_corr_final.dat", status="replace")
+        open(newunit=u, file=trim(outbase)//"corr_final.dat", status="replace")
         fmtstring = "('step ',*('F='," // Ffmt // ",'eV/Å',:,x))"
         write(u, fmt=fmtstring) Fs
 
@@ -114,7 +114,7 @@ program vx_profile_analysis
 
         close(u)
 
-        open(newunit=u, file=trim(outbase)//"_rel_diff.dat", status="replace")
+        open(newunit=u, file=trim(outbase)//"rel_diff.dat", status="replace")
         write(u, fmt=fmtstring) Fs
 
         do i = 1, num_steps
