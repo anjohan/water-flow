@@ -5,8 +5,8 @@
     y_fraction=0.1,
     radius=28.64,
     Fmin=0.00001,
-    Fstep=0.00002,
-    numFs=6,
+    Fstep=0.00001,
+    numFs=11,
     ave_x=2,
     Ffmt="('0',f0.5)"
 /
