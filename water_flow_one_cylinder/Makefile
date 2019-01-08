@@ -1,6 +1,6 @@
 FC = caf
-FFLAGS = -Wall -O0 -g -fcheck=all
-#FFLAGS = -Wall -O3 -g
+#FFLAGS = -Wall -O0 -g -fcheck=all
+FFLAGS = -Wall -O3 -g
 
 progs = $(basename $(wildcard *.f90))
 
