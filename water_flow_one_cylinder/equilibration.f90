@@ -1,5 +1,5 @@
 program vx_profile_analysis
-    use iso_fortran_env, only: iostat_end, real64, int64
+    use mod_velocity_reader
     implicit none
 
     character(len=1024) :: inbase, Fstring, Ffmt, outbase
@@ -9,14 +9,15 @@ program vx_profile_analysis
 
     integer(int64) :: step
     integer(int64), allocatable :: steps(:)
-    integer :: Nx, Ny, Nz, fstat
-    real(real64) :: F, ymin, ymax, zmin, zmax, xmin, xmax,  radius, &
+    real(real64) :: F, radius, &
                     final_v_sum2, final_v_sum
-    real(real64), allocatable :: values(:,:,:,:), Fs(:), &
+    real(real64), allocatable :: Fs(:), &
                                  final_v(:,:,:,:), correlations(:,:), rel_diffs(:,:)
 
     real(real64) :: y_fraction, Lx, Ly, Fmin, Fstep
     integer :: numFs, start_timestep, ave_x, num_steps
+
+    class(velocity_reader), allocatable :: reader
 
     namelist /input/ inbase, start_timestep, outbase, y_fraction, radius, &
                      Fmin, Fstep, numFs, Ffmt, ave_x
@@ -45,28 +46,18 @@ program vx_profile_analysis
         write(Fstring, fmt=Ffmt) F
 
         filename = trim(inbase) // trim(Fstring) // ".bin"
-
-        open(newunit=u, file=filename, access="stream", status="old")
-
-        read(u) Nx, Ny, Nz, xmin, xmax, ymin, ymax, zmin, zmax
-        if (.not. allocated(values)) allocate(values(4, Nz, Ny, Nx))
+        reader = velocity_reader(filename)
 
         num_steps = 0
-        timesteps: do
-            read(u, iostat=fstat) step
-
+        timesteps: do while (.not. reader%eof)
+            call reader%read_step()
             write(*,"(a,x,i0,x,a,x,i0,x,a)") "Image", this_image(), "reading timestep", &
-                                             step, "from " // filename
+                                             reader%step, "from " // filename
 
-            if (fstat == iostat_end) exit timesteps
-            if (fstat /= 0) error stop
-
-            read(u, iostat=fstat) values
-            if (fstat /= 0) error stop
             num_steps = num_steps+1
         end do timesteps
 
-        final_v = values(2:4,:,:,:)
+        final_v = reader%values(2:4,:,:,:)
         final_v_sum = sum(final_v)
         final_v_sum2 = sum(final_v**2)
 
@@ -78,29 +69,27 @@ program vx_profile_analysis
 
         if (.not. allocated(steps)) allocate(steps(num_steps))
 
-        close(u)
+        deallocate(reader)
 
-        open(newunit=u, file=filename, access="stream", status="old")
-
-        read(u) Nx, Ny, Nz, xmin, xmax, ymin, ymax, zmin, zmax
+        reader = velocity_reader(filename)
 
         do i = 1, num_steps
-            read(u) steps(i), values
+            call reader%read_step()
+            steps(i) = reader%step
 
             write(*,"(a,x,i0,x,a,x,i0,x,a)") "Image", this_image(), "reading timestep", &
                                              steps(i), "from " // filename
 
-            correlations(i,l) = sum(final_v(:,:,:,:)*values(2:4,:,:,:))/final_v_sum2
-            rel_diffs(i,l) = sum(final_v - values(2:4,:,:,:))/final_v_sum
+            associate (v => reader%values(2:4,:,:,:))
+                correlations(i,l) = sum(final_v * v)/final_v_sum2
+                rel_diffs(i,l) = sum(final_v - v)/final_v_sum
+            end associate
         end do
 
-        close(u)
-
+        deallocate(reader)
     end do forces
     call co_sum(correlations)
     call co_sum(rel_diffs)
-
-    deallocate(values)
 
     if (this_image() == 1) then
         open(newunit=u, file=trim(outbase)//"corr_final.dat", status="replace")
