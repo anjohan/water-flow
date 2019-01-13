@@ -1,5 +1,6 @@
 program vx_profile_analysis
     use iso_fortran_env, only: iostat_end, real64, int64
+    use mod_velocity_reader
     implicit none
 
     character(len=1024) :: inbase, Fstring, Ffmt, outbase
@@ -10,11 +11,13 @@ program vx_profile_analysis
     integer(int64) :: step
     integer :: Nx, Ny, Nz, fstat
     real(real64) :: F, ymin, ymax, zmin, zmax, xmin, xmax,  radius
-    real(real64), allocatable :: v(:,:,:,:,:), values(:,:,:,:), Fs(:), &
+    real(real64), allocatable :: v(:,:,:,:,:), Fs(:), &
                                  counts(:,:,:,:)
 
     real(real64) :: y_fraction, Lx, Ly, Fmin, Fstep
     integer :: numFs, start_timestep, ave_x
+
+    class(velocity_reader), allocatable :: reader
 
     namelist /input/ inbase, start_timestep, outbase, y_fraction, radius, &
                      Fmin, Fstep, numFs, Ffmt, ave_x
@@ -44,10 +47,13 @@ program vx_profile_analysis
 
         filename = trim(inbase) // trim(Fstring) // ".bin"
 
-        open(newunit=u, file=filename, access="stream", status="old")
+        reader = velocity_reader(filename)
 
-        read(u) Nx, Ny, Nz, xmin, xmax, ymin, ymax, zmin, zmax
-        if (.not. allocated(values)) allocate(values(4, Nz, Ny, Nx))
+        Nx = reader%Nx; Ny = reader%Ny; Nz = reader%Nz
+        xmin = reader%xmin; xmax = reader%xmax
+        ymin = reader%ymin; ymax = reader%ymax
+        zmin = reader%zmin; zmax = reader%zmax
+
         if (.not. allocated(counts)) then
             allocate(counts(Nz, Ny, Nx, numFs))
             counts(:,:,:,:) = 0
@@ -58,44 +64,32 @@ program vx_profile_analysis
             v(:,:,:,:,:) = 0
         end if
 
-        steps: do
-            read(u, iostat=fstat) step
+        steps: do while (.not. reader%eof)
+            call reader%read_step()
 
-            if (fstat == iostat_end) exit steps
-            if (fstat /= 0) error stop
-
-            read(u, iostat=fstat) values
-            if (fstat /= 0) error stop
-
-            if (step < start_timestep) cycle steps
+            if (reader%step < start_timestep) cycle steps
 
             write(*,"(a,x,i0,x,a,x,i0,x,a)") "Image", this_image(), "reading timestep", &
-                                             step, "from " // filename
+                                             reader%step, "from " // filename
 
-            counts(:,:,:,l) = counts(:,:,:,l) + values(1,:,:,:)
+            associate(tmp_counts => reader%values(1,:,:,:), &
+                      tmp_v => reader%values(2:4,:,:,:))
 
-            do i = 1, Nx
-                do j = 1, Ny
-                    do k = 1, Nz
-                        v(:, k, j, i, l) = v(:, k, j, i, l) + values(1, k, j, i) * values(2:4, k, j, i)
-                    end do
+                counts(:,:,:,l) = counts(:,:,:,l) + tmp_counts
+                do concurrent(k=1:Nz, j=1:Ny, i=1:Nx)
+                    v(:, k, j, i, l) = v(:, k, j, i, l) + tmp_counts(k, j, i) * tmp_v(:, k, j, i)
                 end do
-            end do
+            end associate
         end do steps
 
-        do i = 1, Nx
-            do j = 1, Ny
-                do k = 1, Nz
-                if (counts(k,j,i,l) /= 0) v(:, k,j,i,l) = v(:, k,j,i,l) &
-                                                           / counts(k,j,i,l)
-                end do
-            end do
+        do concurrent(k=1:Nz, j=1:Ny, i=1:Nx, counts(k,j,i,l) /= 0)
+            v(:, k,j,i,l) = v(:, k,j,i,l) / counts(k,j,i,l)
         end do
+        deallocate(reader)
     end do forces
     call co_sum(v)
     call co_sum(counts)
 
-    deallocate(values)
     if (this_image() /= 1) deallocate(v, counts)
 
     if (this_image() == 1) then

@@ -1,6 +1,7 @@
 FC = caf
-FFLAGS = -Wall -O0 -g -fcheck=all
-#FFLAGS = -Wall -O3 -g
+#FC = gfortran -fcoarray=single -ftree-parallelize-loops=4 -floop-parallelize-all
+#FFLAGS = -Wall -O0 -g -fcheck=all
+FFLAGS = -Wall -O3 -g
 
 progs = $(basename $(wildcard *.f90))
 
