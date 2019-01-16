@@ -7,7 +7,7 @@ progs = $(basename $(wildcard *.f90))
 
 all: $(progs)
 
-%: %.f90 Makefile
+%: %.f90 Makefile ~/lammps-velocityaverage/readers/reader.f90
 	$(FC) $(FFLAGS) -o $@ ~/lammps-velocityaverage/readers/reader.f90 $<
 
 clean:
