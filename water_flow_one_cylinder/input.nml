@@ -1,7 +1,7 @@
 &input
     inbase="dum_packmol/data/v_",
     start_timestep=1000000,
-    outbase="output",
+    outbase="/home/anders/master/data/lx30/",
     y_fraction=0.1,
     radius=28.64,
     Fmin=0.00001,
