@@ -6,7 +6,7 @@ variable heating_time equal 30
 variable heating_steps equal ${heating_time}/${dt}
 variable thermalising_time equal 20
 variable thermalising_steps equal ${thermalising_time}/${dt}
-variable cooling_time equal 120
+variable cooling_time equal 10
 variable cooling_steps equal ${cooling_time}/${dt}
 variable thermalising_time_final equal 50
 variable thermalising_steps_final equal ${thermalising_time_final}/${dt}
@@ -52,8 +52,23 @@ run ${heating_steps}
 fix termostat all nvt temp ${highest_temperature} ${highest_temperature} 1.0
 run ${thermalising_steps}
 
-fix termostat all nvt temp ${highest_temperature} ${T} 1.0
+variable thermalising_time equal 10
+variable thermalising_steps equal ${thermalising_time}/${dt}
+
+variable cooling_temp index 4000 1900 1400 950 600 375 300
+
+label temploop
+
+variable T1 equal ${cooling_temp}
+next cooling_temp
+variable T2 equal ${cooling_temp}
+
+fix termostat all nvt temp ${T1} ${T2} 1.0
 run ${cooling_steps}
+fix termostat all nvt temp ${T2} ${T2} 1.0
+run ${thermalising_steps}
+
+if "${cooling_temp} > 301" then "jump SELF temploop"
 
 fix termostat all nvt temp ${T} ${T} 1.0
 run ${thermalising_steps_final}
