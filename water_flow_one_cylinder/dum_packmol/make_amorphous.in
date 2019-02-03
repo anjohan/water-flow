@@ -46,7 +46,7 @@ dump lagring all custom ${dump_frequency} data/amorphous.in.bin id type x y z
 
 velocity all create ${start_temperature} 277385 mom yes loop geom
 
-fix termostat all nvt temp ${start_temperature} ${highest_temperature} 1.0
+fix termostat all nvt temp ${start_temperature} ${highest_temperature} 0.1
 run ${heating_steps}
 
 fix termostat all nvt temp ${highest_temperature} ${highest_temperature} 1.0
@@ -63,7 +63,7 @@ variable T1 equal ${cooling_temp}
 next cooling_temp
 variable T2 equal ${cooling_temp}
 
-fix termostat all nvt temp ${T1} ${T2} 1.0
+fix termostat all nvt temp ${T1} ${T2} 0.1
 run ${cooling_steps}
 fix termostat all nvt temp ${T2} ${T2} 1.0
 run ${thermalising_steps}
