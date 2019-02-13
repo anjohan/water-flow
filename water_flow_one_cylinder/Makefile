@@ -1,14 +1,32 @@
-FC = caf
-#FC = gfortran -fcoarray=single -ftree-parallelize-loops=4 -floop-parallelize-all
-#FFLAGS = -Wall -O0 -g -fcheck=all
-FFLAGS = -Wall -O3 -g
+lammps = $(shell find ~ -name lmp 2> /dev/null)
 
-progs = $(basename $(wildcard *.f90))
+# all: data/water_0.0001.bin
+all: $(foreach force,$(shell seq 0.00001 0.00001 0.0001), data/water_$(force).bin)
 
-all: $(progs)
+log.system: system.in
+	mpirun $(lammps) -in system.in
 
-%: %.f90 Makefile ~/lammps-velocityaverage/readers/reader.f90
-	$(FC) $(FFLAGS) -o $@ ~/lammps-velocityaverage/readers/reader.f90 $<
+data/amorphous.data: make_amorphous.in system.in
+	mkdir -p data
+	mpirun $(lammps) -in make_amorphous.in  # 30 min on 128 cores
 
-clean:
-	rm -rf *.dat $(progs)
+data/unpassivated.data: data/amorphous.data system.in common_regions_groups.in make_setup.in
+	mpirun $(lammps) -in make_setup.in
+
+data/unpassivatedwithH.data: data/unpassivated.data fix_setup_addH.py
+	python3 fix_setup_addH.py
+
+data/passivated.xyz: data/unpassivatedwithH.data system.in common_regions_groups.in passivate.in
+	mpirun -np 1 $(lammps) -in passivate.in
+
+data/water.inp: packmol_template.inp water.py data/unpassivatedwithH.data
+	python3 water.py
+
+data/withwater.xyz: data/passivated.xyz data/water.inp water.xyz
+	packmol < data/water.inp
+
+data/withwater.data: data/withwater.xyz withwater_xyztodata.py
+	python3 withwater_xyztodata.py
+
+data/water_%.bin: data/withwater.data water.in system.in common_regions_groups.in
+	mpirun $(lammps) -var FORCE $* -in water.in

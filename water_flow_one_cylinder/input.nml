@@ -1,5 +1,5 @@
 &input
-    inbase="dum_packmol/data2/v_",
+    inbase="data/v_",
     start_timestep=1000000,
     outbase="/home/anders/master/data/lx60/",
     y_fraction=0.1,
