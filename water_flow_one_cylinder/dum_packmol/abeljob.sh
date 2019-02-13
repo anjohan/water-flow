@@ -8,9 +8,8 @@
 #SBATCH --mail-user=anjohan@uio.no
 #SBATCH --mem-per-cpu=3600M
 
-# source /cluster/bin/jobsetup
-module load intel
-mpirun -n 1 ls
-#
-# mpirun -n 1 /usit/abel/u1/anjohan/cmake_lammps/lammps/build/lmp -in make_amorphous.in
-# make data/amorphous.data
+source /cluster/bin/jobsetup
+module load intel/2019.2
+module load intelmpi.intel
+
+mpirun -n 1 /usit/abel/u1/anjohan/cmake_lammps/lammps/build/lmp -in make_amorphous.in
