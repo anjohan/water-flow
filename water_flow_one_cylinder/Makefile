@@ -1,7 +1,11 @@
 lammps = $(shell find ~ -name lmp 2> /dev/null)
+forces = $(shell seq 0.00001 0.00002 0.0001)
+
+ITERATIONS ?= 2
+.SECONDARY:
 
 # all: data/water_0.0001.bin
-all: $(foreach force,$(shell seq 0.00001 0.00001 0.0001), data/water_$(force).bin)
+all: $(foreach force,$(forces), data/restart.flow_$(force)_$(ITERATIONS))
 
 log.system: system.in
 	mpirun $(lammps) -in system.in
@@ -28,5 +32,12 @@ data/withwater.xyz: data/passivated.xyz data/water.inp water.xyz
 data/withwater.data: data/withwater.xyz withwater_xyztodata.py
 	python3 withwater_xyztodata.py
 
-data/water_%.bin: data/withwater.data water.in system.in common_regions_groups.in
-	mpirun $(lammps) -var FORCE $* -in water.in
+data/restart.flow_%_0: data/withwater.data water_setup.in system.in common_regions_groups.in
+	mpirun $(lammps) -var FORCE $* -in water_setup.in
+
+define defflow =
+data/restart.flow_%_$(1): data/restart.flow_%_$$(shell expr $(1) - 1) flow.in
+	mpirun $(lammps) -var FORCE $$* -var ITERATION $(1) -in flow.in
+endef
+
+$(foreach i,$(shell seq 1 $(ITERATIONS)),$(eval $(call defflow,$(i))))
