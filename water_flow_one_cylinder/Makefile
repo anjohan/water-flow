@@ -1,5 +1,5 @@
 lammps = $(shell find ~ -name lmp 2> /dev/null)
-forces = $(shell seq 0.00001 0.00002 0.0001)
+forces = $(shell LC_NUMERIC=en_US seq 0.00001 0.00001 0.0001)
 
 ITERATIONS ?= 2
 .SECONDARY:

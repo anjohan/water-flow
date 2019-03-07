@@ -1,7 +1,7 @@
 include system.in
 log data/log.water_${FORCE}_${ITERATION}
 
-read_restart data/restart.creep_${FORCE}_$(v_ITERATION-1)
+read_restart data/restart.flow_${FORCE}_$(v_ITERATION-1)
 
 if "${ITERATION} == 1" then "reset_timestep 0"
 
@@ -10,10 +10,6 @@ if "${ITERATION} == 1" then "reset_timestep 0"
 #/atom 3 hydrogen
 #/bond 1 2 2.6
 #/bond 2 3 1.4
-
-units metal
-boundary p p p
-atom_style atomic
 
 pair_style  usc
 pair_coeff  * * SiOH2O.vashishta Si O H
@@ -54,6 +50,9 @@ fix externalforce water addforce ${FORCE} 0 0
 variable vcmx_water equal vcm(water,x)
 compute watertemp water temp
 
+group oxygen type 2
+group water_oxygen intersect water oxygen
+
 compute vacf water vacf
 thermo 100
 thermo_style custom step time temp c_watertemp v_vcmx_water ke pe etotal press pzz c_vacf[4] spcpu cpuremain
@@ -63,7 +62,7 @@ dump raredump all custom ${longdumpperiod} data/waterlowfrequency_${FORCE}_${ITE
 # ===== binning for vx ===== #
 variable num_bins_xy equal 400
 variable num_bins_z  equal 50
-fix velave water velocityaverage data/v_${FORCE}_${ITERATION}.bin 20 100000 ${num_bins_xy} ${num_bins_xy} ${num_bins_z} 0 $(lx) 0 $(ly) ${z_topofslab} ${z_topofcylinder}
+fix velave water_oxygen velocityaverage data/v_${FORCE}_${ITERATION}.bin 20 100000 ${num_bins_xy} ${num_bins_xy} ${num_bins_z} 0 $(lx) 0 $(ly) ${z_topofslab} ${z_topofcylinder}
 
 run ${num_steps}
 write_restart data/restart.flow_${FORCE}_${ITERATION}
