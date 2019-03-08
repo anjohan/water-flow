@@ -1,8 +1,8 @@
 set terminal pngcairo size 1000, 1000
 
-vx_filename = "output_vx_vs_x.dat"
-vx_wrapped_filename = "output_vx_vs_x_wrapped.dat"
-vx_asymm_filename = "output_asymmetry.dat"
+vx_filename = "data/vx_vs_x.dat"
+vx_wrapped_filename = "data/vx_vs_x_wrapped.dat"
+vx_asymm_filename = "data/asymmetry.dat"
 
 set grid
 set key autotitle columnhead
