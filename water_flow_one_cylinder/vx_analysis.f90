@@ -3,13 +3,14 @@ program vx_profile_analysis
     use mod_velocity_reader
     implicit none
 
-    character(len=1024) :: inbase, Fstring, Ffmt, outbase
-    character(len=:), allocatable :: filename, fmtstring
+    character(len=1024) :: inbase, Fstring, Ffmt, outbase, filename
+    character(len=:), allocatable :: fmtstring
 
     integer :: i, j, k, l, u
 
     integer(int64) :: step
-    integer :: Nx, Ny, Nz, fstat
+    integer :: Nx, Ny, Nz, fstat, iter
+    logical :: file_exists
     real(real64) :: F, ymin, ymax, zmin, zmax, xmin, xmax,  radius
     real(real64), allocatable :: v(:,:,:,:,:), Fs(:), &
                                  counts(:,:,:,:)
@@ -45,47 +46,63 @@ program vx_profile_analysis
         Fstring(:) = " "
         write(Fstring, fmt=Ffmt) F
 
-        filename = trim(inbase) // trim(Fstring) // ".bin"
+        iter = 0
+        iterations: do
+            iter = iter + 1
 
-        reader = velocity_reader(filename)
+            filename(:) = " "
+            write(filename, "(a,a,'_',i0,'.bin')") trim(inbase), trim(Fstring), iter
 
-        Nx = reader%Nx; Ny = reader%Ny; Nz = reader%Nz
-        xmin = reader%xmin; xmax = reader%xmax
-        ymin = reader%ymin; ymax = reader%ymax
-        zmin = reader%zmin; zmax = reader%zmax
+            inquire(file=trim(filename), exist=file_exists)
 
-        if (.not. allocated(counts)) then
-            allocate(counts(Nz, Ny, Nx, numFs))
-            counts(:,:,:,:) = 0
-        end if
+            if (.not. file_exists) then
+                write(*,*) "Cannot open " // trim(filename)
+                exit iterations
+            else
+                write(*,*) "Opening " // trim(filename)
+            end if
 
-        if (.not. allocated(v)) then
-            allocate(v(3, Nz, Ny, Nx, numFs))
-            v(:,:,:,:,:) = 0
-        end if
+            reader = velocity_reader(filename)
 
-        steps: do while (.not. reader%eof)
-            call reader%read_step()
+            Nx = reader%Nx; Ny = reader%Ny; Nz = reader%Nz
+            xmin = reader%xmin; xmax = reader%xmax
+            ymin = reader%ymin; ymax = reader%ymax
+            zmin = reader%zmin; zmax = reader%zmax
 
-            if (reader%step < start_timestep) cycle steps
+            if (.not. allocated(counts)) then
+                allocate(counts(Nz, Ny, Nx, numFs))
+                counts(:,:,:,:) = 0
+            end if
 
-            write(*,"(a,x,i0,x,a,x,i0,x,a)") "Image", this_image(), "reading timestep", &
-                                             reader%step, "from " // filename
+            if (.not. allocated(v)) then
+                allocate(v(3, Nz, Ny, Nx, numFs))
+                v(:,:,:,:,:) = 0
+            end if
 
-            associate(tmp_counts => reader%values(1,:,:,:), &
-                      tmp_v => reader%values(2:4,:,:,:))
+            steps: do while (.not. reader%eof)
+                call reader%read_step()
 
-                counts(:,:,:,l) = counts(:,:,:,l) + tmp_counts
-                do concurrent(k=1:Nz, j=1:Ny, i=1:Nx)
-                    v(:, k, j, i, l) = v(:, k, j, i, l) + tmp_counts(k, j, i) * tmp_v(:, k, j, i)
-                end do
-            end associate
-        end do steps
+                if (reader%step < start_timestep) cycle steps
 
+                write(*,"(a,x,i0,x,a,x,i0,x,a)") "Image", this_image(), "reading timestep", &
+                                                 reader%step, "from " // trim(filename)
+
+                associate(tmp_counts => reader%values(1,:,:,:), &
+                          tmp_v => reader%values(2:4,:,:,:))
+
+                    counts(:,:,:,l) = counts(:,:,:,l) + tmp_counts
+                    do concurrent(k=1:Nz, j=1:Ny, i=1:Nx)
+                        v(:, k, j, i, l) = v(:, k, j, i, l) + tmp_counts(k, j, i) * tmp_v(:, k, j, i)
+                    end do
+                end associate
+            end do steps
+
+            deallocate(reader)
+
+        end do iterations
         do concurrent(k=1:Nz, j=1:Ny, i=1:Nx, counts(k,j,i,l) /= 0)
             v(:, k,j,i,l) = v(:, k,j,i,l) / counts(k,j,i,l)
         end do
-        deallocate(reader)
     end do forces
     call co_sum(v)
     call co_sum(counts)
