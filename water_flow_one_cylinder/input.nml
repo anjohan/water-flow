@@ -1,12 +1,12 @@
 &input
-    inbase="data/v_",
+    inbase="/home/anders/mullins/nanopillarer/data/2019_03_26_4ns_flow_multiF/data/v_",
     start_timestep=1000000,
     outbase="data/",
     y_fraction=0.1,
     radius=28.64,
     Fmin=0.00001,
-    Fstep=0.00002,
-    numFs=5,
+    Fstep=0.00001,
+    numFs=10,
     ave_x=2,
     Ffmt="('0',f0.5)"
 /
