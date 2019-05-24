@@ -18,17 +18,17 @@ program analysis
 
 
     Fs = [(0.00001d0*i, i = 1, numFs)]
-    vx(:,:) = 0
 
-    vx_counts(:) = 0
-
-    lengths: do Li = 1, 1
+    lengths: do Li = 1, 2
 
         Lx = 30*a*Li
         dx = Lx/num_bins_x
 
         cyl_xmin = Lx/2 - r
         cyl_xmax = Lx/2 + r
+
+        vx(:,:) = 0
+        vx_counts(:) = 0
 
         forces: do Fi = 1, numFs
 
@@ -70,7 +70,6 @@ program analysis
 
         end do forces
 
-        sync all
         call co_sum(vx)
         if (this_image() /= 1) cycle lengths
 
